@@ -51,3 +51,64 @@ p {
 body {
   width: 100%;
 }
+
+/* Header Start */
+#header {
+  /* make logo and nav in a row */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 80px;
+  background: #E3E6F3;
+  box-shadow: 0 5px rgba(0, 0, 0, 0.06);
+}
+
+#navbar {
+  /* make navbar content in a row */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#navbar li {
+  /* remove bullet point */
+  list-style: none;
+  padding: 0 20px;
+  position: relative;
+}
+
+#navbar li a {
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  /* make hover smoother */
+  transition: 0.3s ease;
+}
+
+#navbar li a:hover,
+#navbar li a.active {
+  color: #088178;
+}
+
+/* add underline effect of active */
+#navbar li a.active::after,
+#navbar li a:hover::after {
+  content: "";
+  width: 30%;
+  height: 2px;
+  background-color:#088178;
+  /* related to parent li tag */
+  position: absolute;
+  bottom: -4px;
+  left: 20px;
+}
+/* Home page */
+#hero {
+  background-image: url("img/hero4.png");
+  /* hero img to display in full screen */
+  height: 90vh;
+  width: 100%;
+  background-size: cover;
+  background-position: top 25% right 0;
+}
