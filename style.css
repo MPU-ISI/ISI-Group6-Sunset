@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Spartan:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
 * {
   margin: 0;
   padding: 0;
@@ -64,7 +65,7 @@ body {
   /* solve box-shadow doesn't show up */
   z-index: 999;
   /* make navbar sticky*/
-  position:sticky;
+  position: sticky;
   top: 0;
   left: 0;
 }
@@ -103,12 +104,13 @@ body {
   content: "";
   width: 30%;
   height: 2px;
-  background-color:#088178;
+  background-color: #088178;
   /* related to parent li tag */
   position: absolute;
   bottom: -4px;
   left: 20px;
 }
+
 /* Home page */
 #hero {
   background-image: url("img/hero4.png");
@@ -124,15 +126,15 @@ body {
   justify-content: center;
 }
 
-#hero h4{
+#hero h4 {
   padding-bottom: 15px;
 }
 
-D h1{
+D h1 {
   color: #088178;
 }
 
-#hero button{
+#hero button {
   background-image: url("img/button.png");
   background-color: transparent;
   color: #088178;
@@ -142,4 +144,76 @@ D h1{
   cursor: pointer;
   font-weight: 700;
   font-size: 15px;
+}
+
+/* 全局样式 */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+/* 表单样式 */
+form {
+  width: 100%;
+  max-width: 400px;
+  margin: 50px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+  display: block;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #5cb85c;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #4cae4c;
+}
+
+/* 链接样式 */
+p {
+  text-align: center;
+}
+
+a {
+  color: #5cb85c;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
