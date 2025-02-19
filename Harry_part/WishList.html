@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>智能购物系统</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --hover-color: #2980b9;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .search-section {
+            margin-bottom: 2rem;
+        }
+
+        #searchInput {
+            width: 300px;
+            padding: 12px;
+            border: 2px solid var(--primary-color);
+            border-radius: 25px;
+            font-size: 16px;
+        }
+
+        .wishlist-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .wishlist-item {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .wishlist-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .promo-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        button {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: var(--hover-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="search-section">
+        <input type="text" id="searchInput" placeholder="搜索商品...">
+    </div>
+
+    <div id="promoNotification" class="notification"></div>
+
+    <h2>我的愿望单</h2>
+    <div class="wishlist-container" id="wishlistContainer"></div>
+
+    <script>
+        // 数据存储服务（后续可替换为API调用）
+        const wishlistService = {
+            getWishlist() {
+                return JSON.parse(localStorage.getItem('wishlist')) || [];
+            },
+            saveWishlist(items) {
+                localStorage.setItem('wishlist', JSON.stringify(items));
+            }
+        };
+
+        // 促销服务
+        const promotionService = {
+            checkPromotions(items) {
+                // 模拟促销检查逻辑（后续应该使用产品是否在促销中来判断，促销政策可能不止单指向一个产品）
+                return items.map(item => ({
+                    ...item,
+                    hasPromo: Math.random() > 0.5  // 随机生成促销状态
+                }));
+            }
+        };
+
+        // 搜索分析模块
+        const searchAnalytics = {
+            lastSearch: '',
+            trackSearch(query) {
+                if(query !== this.lastSearch) {
+                    console.log('跟踪搜索关键词:', query);
+                    this.lastSearch = query;
+                    // 后续可添加API调用
+                }
+            }
+        };
+
+        // 界面渲染模块
+        const renderer = {
+            renderWishlist() {
+                const container = document.getElementById('wishlistContainer');
+                const wishlist = wishlistService.getWishlist();
+                const promotedItems = promotionService.checkPromotions(wishlist);
+
+                container.innerHTML = promotedItems.map(item => `
+                    <div class="wishlist-item">
+                        ${item.hasPromo ? '<div class="promo-badge">促销中</div>' : ''}
+                        <h3>${item.name}</h3>
+                        <p>价格: ¥${item.price.toFixed(2)}</p>
+                        <button onclick="removeFromWishlist(${item.id})">移除</button>
+                    </div>
+                `).join('');
+
+                // 显示促销通知
+                if(promotedItems.some(item => item.hasPromo)) {
+                    this.showNotification('您愿望单中的商品正在促销！');
+                }
+            },
+
+            showNotification(message) {
+                const notification = document.getElementById('promoNotification');
+                notification.textContent = message;
+                notification.style.display = 'block';
+                setTimeout(() => notification.style.display = 'none', 5000);
+            }
+        };
+
+        // 搜索输入处理
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            searchAnalytics.trackSearch(e.target.value);
+        });
+
+        // 愿望单操作方法
+        window.addToWishlist = (product) => {
+            const wishlist = wishlistService.getWishlist();
+            if(!wishlist.some(item => item.id === product.id)) {
+                wishlistService.saveWishlist([...wishlist, product]);
+                renderer.renderWishlist();
+            }
+        };
+
+        window.removeFromWishlist = (id) => {
+            const wishlist = wishlistService.getWishlist();
+            wishlistService.saveWishlist(wishlist.filter(item => item.id !== id));
+            renderer.renderWishlist();
+        };
+
+        // 初始化示例商品（开发用）
+        const sampleProduct = {
+            id: 1,
+            name: '示例商品',
+            price: 99.99
+        };
+        addToWishlist(sampleProduct);
+    </script>
+</body>
+</html>
