@@ -1,0 +1,2 @@
+[console_scripts]
+nvm = nvm.cli.nvm:main

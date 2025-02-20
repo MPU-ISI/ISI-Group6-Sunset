@@ -1,0 +1,132 @@
+Metadata-Version: 2.1
+Name: nvm
+Version: 1.0.21
+Summary: Plenty little helpers.
+Home-page: https://github.com/cogsys-io/nvm
+Author: cogsys.io
+Author-email: cogsys@cogsys.io
+License: GNU General Public License v3
+Keywords: nvm
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Requires-Python: >=3.8
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+License-File: AUTHORS.rst
+Requires-Dist: GitPython (>=3.1.31)
+Requires-Dist: blessed (>=1.20.0)
+Requires-Dist: srsly (>=2.4.0)
+Requires-Dist: pandas (>=1.4.0)
+Requires-Dist: pytz (>=2022.1)
+Requires-Dist: tzlocal (>=4.2)
+Requires-Dist: humanfriendly (>=10.0)
+Requires-Dist: contexttimer (>=0.3.3)
+Provides-Extra: all
+Requires-Dist: GitPython (>=3.1.31) ; extra == 'all'
+Requires-Dist: blessed (>=1.20.0) ; extra == 'all'
+Requires-Dist: srsly (>=2.4.0) ; extra == 'all'
+Requires-Dist: pandas (>=1.4.0) ; extra == 'all'
+Requires-Dist: pytz (>=2022.1) ; extra == 'all'
+Requires-Dist: tzlocal (>=4.2) ; extra == 'all'
+Requires-Dist: humanfriendly (>=10.0) ; extra == 'all'
+Requires-Dist: contexttimer (>=0.3.3) ; extra == 'all'
+Requires-Dist: pytest-runner (>=5.2) ; extra == 'all'
+Requires-Dist: build (>=0.10.0) ; extra == 'all'
+Requires-Dist: black (==23.3.0) ; extra == 'all'
+Requires-Dist: codecov (==2.1.13) ; extra == 'all'
+Requires-Dist: flake8 (==6.0.0) ; extra == 'all'
+Requires-Dist: flake8-debugger (==4.1.2) ; extra == 'all'
+Requires-Dist: pytest (==5.4.3) ; extra == 'all'
+Requires-Dist: pytest-cov (==4.0.0) ; extra == 'all'
+Requires-Dist: pytest-raises (==0.11) ; extra == 'all'
+Requires-Dist: versioneer (>=0.28) ; extra == 'all'
+Requires-Dist: coverage (>=5.1) ; extra == 'all'
+Requires-Dist: ipython (>=7.15.0) ; extra == 'all'
+Requires-Dist: m2r2 (>=0.2.7) ; extra == 'all'
+Requires-Dist: sphinx (>=5.3.0) ; extra == 'all'
+Requires-Dist: sphinx-rtd-theme (>=1.2.0) ; extra == 'all'
+Requires-Dist: tox (>=3.15.2) ; extra == 'all'
+Requires-Dist: twine (>=3.1.1) ; extra == 'all'
+Requires-Dist: wheel (>=0.34.2) ; extra == 'all'
+Provides-Extra: dev
+Requires-Dist: pytest-runner (>=5.2) ; extra == 'dev'
+Requires-Dist: build (>=0.10.0) ; extra == 'dev'
+Requires-Dist: black (==23.3.0) ; extra == 'dev'
+Requires-Dist: codecov (==2.1.13) ; extra == 'dev'
+Requires-Dist: flake8 (==6.0.0) ; extra == 'dev'
+Requires-Dist: flake8-debugger (==4.1.2) ; extra == 'dev'
+Requires-Dist: pytest (==5.4.3) ; extra == 'dev'
+Requires-Dist: pytest-cov (==4.0.0) ; extra == 'dev'
+Requires-Dist: pytest-raises (==0.11) ; extra == 'dev'
+Requires-Dist: versioneer (>=0.28) ; extra == 'dev'
+Requires-Dist: coverage (>=5.1) ; extra == 'dev'
+Requires-Dist: ipython (>=7.15.0) ; extra == 'dev'
+Requires-Dist: m2r2 (>=0.2.7) ; extra == 'dev'
+Requires-Dist: sphinx (>=5.3.0) ; extra == 'dev'
+Requires-Dist: sphinx-rtd-theme (>=1.2.0) ; extra == 'dev'
+Requires-Dist: tox (>=3.15.2) ; extra == 'dev'
+Requires-Dist: twine (>=3.1.1) ; extra == 'dev'
+Requires-Dist: wheel (>=0.34.2) ; extra == 'dev'
+Provides-Extra: setup
+Requires-Dist: pytest-runner (>=5.2) ; extra == 'setup'
+Requires-Dist: build (>=0.10.0) ; extra == 'setup'
+Provides-Extra: test
+Requires-Dist: black (==23.3.0) ; extra == 'test'
+Requires-Dist: codecov (==2.1.13) ; extra == 'test'
+Requires-Dist: flake8 (==6.0.0) ; extra == 'test'
+Requires-Dist: flake8-debugger (==4.1.2) ; extra == 'test'
+Requires-Dist: pytest (==5.4.3) ; extra == 'test'
+Requires-Dist: pytest-cov (==4.0.0) ; extra == 'test'
+Requires-Dist: pytest-raises (==0.11) ; extra == 'test'
+
+===
+NVM
+===
+
+.. image:: https://img.shields.io/pypi/v/nvm?version=latest
+   :target: https://pypi.python.org/pypi/nvm
+   :alt: PyPI Version
+
+.. image:: https://img.shields.io/github/actions/workflow/status/cogsys-io/nvm/build-main.yml
+   :alt: GitHub Workflow (Build Main) Status
+   :target: https://github.com/cogsys-io/nvm
+
+.. image:: https://readthedocs.org/projects/nvm/badge/?version=latest
+   :target: https://nvm.readthedocs.io/en/latest
+   :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/l/nvm?color=brightgreen
+   :target: https://github.com/cogsys-io/nvm/blob/master/LICENSE
+   :alt: License
+
+Plenty little helpers.
+
+* PyPi: https://pypi.org/project/nvm/
+* GitHub: https://github.com/cogsys-io/nvm
+* Documentation: https://nvm.readthedocs.io (https://nvm.rtfd.io)
+* Developers: https://cogsys.io
+* Free software: GNU General Public License v3
+
+Features
+--------
+
+* Plenty little helpers.
+
+Credits
+-------
+
+This package was created with Cookiecutter_ and the `cogsys-io/cogsys-io-cookiecutter-pypackage`_ project template.
+
+.. _Cookiecutter: https://github.com/cookiecutter/cookiecutter
+.. _`cogsys-io/cogsys-io-cookiecutter-pypackage`: https://github.com/cogsys-io/cogsys-io-cookiecutter-pypackage
+
+
+=======
+History
+=======
+
+* See https://pypi.org/project/nvm/#history
