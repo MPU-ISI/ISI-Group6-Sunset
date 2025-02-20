@@ -67,4 +67,22 @@ router.put("/:id/pay", isAuth, async (req, res) => {
   }
 });
 
+// Update order status
+router.put("/:id/status", isAuth, async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  if (order) {
+    order.status = req.body.status;  // Update order status
+    if (order.status === 'shipped') {
+      order.shippedAt = Date.now(); //Record delivery time
+    }
+    if (order.status === 'completed') {
+      order.deliveredAt = Date.now();  //Record completion time
+    }
+    await order.save();
+    res.status(200).send({ message: 'Order status updated', order });
+  } else {
+    res.status(404).send({ message: 'Order not found' });
+  }
+});
+
 export default router;
