@@ -1,8 +1,22 @@
 import express from 'express';
+import multer from 'multer';// Import multer to handle file uploads
 import Product from '../models/productModel';
 import { isAuth, isAdmin } from '../util';
 
 const router = express.Router();
+
+// Set the storage method for uploaded images
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');  // Directory for saving uploaded images
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);  // The file name is timestamp + original file name
+  },
+});
+
+const upload = multer({ storage });  
+
 
 router.get('/', async (req, res) => {
   const category = req.query.category ? { category: req.query.category } : {};
@@ -105,6 +119,19 @@ router.post('/', isAuth, isAdmin, async (req, res) => {
       .send({ message: 'New Product Created', data: newProduct });
   }
   return res.status(500).send({ message: ' Error in Creating Product.' });
+});
+
+// New route: handle multiple image uploads of products
+router.post('/:id/upload', isAuth, isAdmin, upload.array('images', 5), async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (product) {
+    const images = req.files.map((file) => file.path);  
+    product.additionalImages.push(...images);  // Store the image path in the `additionalImages` field
+    await product.save();
+    res.status(200).send({ message: 'Images uploaded successfully', product });
+  } else {
+    res.status(404).send({ message: 'Product Not Found' });
+  }
 });
 
 export default router;
