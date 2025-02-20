@@ -132,6 +132,6 @@ router.post('/:id/upload', isAuth, isAdmin, upload.array('images', 5), async (re
   } else {
     res.status(404).send({ message: 'Product Not Found' });
   }
-});
+});//test
 
 export default router;
