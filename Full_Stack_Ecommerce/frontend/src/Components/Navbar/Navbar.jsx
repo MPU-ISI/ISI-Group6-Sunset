@@ -3,6 +3,7 @@ import './Navbar.css'
 import { Link } from 'react-router-dom'
 import logo from '../Assets/logo.png'
 import cart_icon from '../Assets/cart_icon.png'
+import wishlist_icon from '../Assets/wishlist_icon.jpg'
 import { ShopContext } from '../../Context/ShopContext'
 import nav_dropdown from '../Assets/nav_dropdown.png'
 
@@ -36,6 +37,7 @@ const Navbar = () => {
         ?<button onClick={()=>{localStorage.removeItem('auth-token');window.location.replace("/");}}>Logout</button>
         :<Link to='/login' style={{ textDecoration: 'none' }}><button>Login</button></Link>}
         <Link to="/cart"><img src={cart_icon} alt="cart"/></Link>
+        <Link to="/wishList"><img src={wishlist_icon} alt="wishList"/></Link>
         <div className="nav-cart-count">{getTotalCartItems()}</div>
       </div>
     </div>

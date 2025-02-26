@@ -1,5 +1,5 @@
 {
-  "name": "e-commerce-frontend",
+  "name": "e-commerce-admin",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -35,10 +35,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "eslint": "^9.21.0",
-    "eslint-plugin-flowtype": "^8.0.3",
-    "eslint-plugin-jest": "^28.11.0"
   }
 }
