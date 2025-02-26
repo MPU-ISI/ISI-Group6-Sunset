@@ -41,7 +41,9 @@ const ListProduct = () => {
           <div key={index}>
             <div className="listproduct-format-main listproduct-format">
               <p>{e.id}</p>
-              <img className="listproduct-product-icon" src={backend_url + e.image} alt="" />
+              <a href={`http://localhost:3001/product/${e.id}`}>
+                <img className="productIMG" src={`${backend_url}${e.image}`} alt={e.name} />
+              </a>
               <p className="cartitems-product-title">{e.name}</p>
               <p>{currency}{e.old_price}</p>
               <p>{currency}{e.new_price}</p>

@@ -11,7 +11,7 @@
 }
 .listproduct-format-main{
   display: grid;
-  grid-template-columns: 1fr 1fr 3fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1.5fr 3fr 1fr 1fr 1fr 1fr;
   gap: 10px;
   width: 100%;
   padding: 20px 0px;
@@ -38,6 +38,9 @@
 }
 .listproduct-allproducts::-webkit-scrollbar{
     display: none;
+}
+.productIMG{
+  width: 110%;
 }
 @media(max-width:800px){
   .listproduct {
