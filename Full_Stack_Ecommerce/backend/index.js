@@ -69,6 +69,7 @@ const Product = mongoose.model("Product", {
   name: { type: String, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
+  image2: { type: String, required: true },
   category: { type: String, required: true },
   new_price: { type: Number },
   old_price: { type: Number },

@@ -5,11 +5,13 @@ import { backend_url } from "../../App";
 
 const AddProduct = () => {
 
-  const [image, setImage] = useState(false);
+  const [image1, setImage1] = useState(null);
+  const [image2, setImage2] = useState(null);
   const [productDetails, setProductDetails] = useState({
     name: "",
     description: "",
-    image: "",
+    image1: "",
+    image2: "",
     category: "women",
     new_price: "",
     old_price: ""
@@ -21,7 +23,12 @@ const AddProduct = () => {
     let product = productDetails;
 
     let formData = new FormData();
-    formData.append('product', image);
+    if (image1) {
+      formData.append('image1', image1);
+    }
+    if (image2) {
+      formData.append('image2', image2);
+    }
 
     await fetch(`${backend_url}/upload`, {
       method: 'POST',
@@ -33,7 +40,8 @@ const AddProduct = () => {
       .then((data) => { dataObj = data });
 
     if (dataObj.success) {
-      product.image = dataObj.image_url;
+      product.image1 = dataObj.image1_url;
+      product.image2 = dataObj.image2_url
       await fetch(`${backend_url}/addproduct`, {
         method: 'POST',
         headers: {
@@ -83,9 +91,13 @@ const AddProduct = () => {
       <div className="addproduct-itemfield">
         <p>Product image</p>
         <label htmlFor="file-input">
-          <img className="addproduct-thumbnail-img" src={!image ? upload_area : URL.createObjectURL(image)} alt="" />
+          <img className="addproduct-thumbnail-img" src={!image1 ? upload_area : URL.createObjectURL(image1)} alt="" />
         </label>
-        <input onChange={(e) => setImage(e.target.files[0])} type="file" name="image" id="file-input" accept="image/*" hidden />
+        <input onChange={(e) => setImage1(e.target.files[0])} type="file" name="image" id="file-input" accept="image/*" hidden />
+        <label htmlFor="file-input-2">
+          <img className="addproduct-thumbnail-img" src={!image2 ? upload_area : URL.createObjectURL(image2)} alt="" />
+        </label>
+        <input onChange={(e) => setImage2(e.target.files[0])} type="file" name="image2" id="file-input-2" accept="image/*" hidden />
       </div>
       <button className="addproduct-btn" onClick={() => { AddProduct() }}>ADD</button>
     </div>
