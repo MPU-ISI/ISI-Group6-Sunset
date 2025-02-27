@@ -26,7 +26,11 @@ const CartItems = () => {
           return  <div>
                     <div className="cartitems-format-main cartitems-format">
                       <img className="cartitems-product-icon" src={backend_url+e.image} alt="" />
-                      <p cartitems-product-title>{e.name}</p>
+                      <p className="cartitems-product-title">
+                        <a href={`/product/${e.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          {e.name}
+                        </a>
+                      </p>
                       <p>{currency}{e.new_price}</p>
                       <button className="cartitems-quantity">{cartItems[e.id]}</button>
                       <p>{currency}{e.new_price*cartItems[e.id]}</p>

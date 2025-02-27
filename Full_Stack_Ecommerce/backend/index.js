@@ -55,10 +55,12 @@ const fetchuser = async (req, res, next) => {
 
 // Schema for creating user model
 const Users = mongoose.model("Users", {
-  name: { type: String },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   email: { type: String, unique: true },
   password: { type: String },
   cartData: { type: Object },
+  shippingAddress: { type: String, required: true },
   date: { type: Date, default: Date.now() },
 });
 
@@ -74,6 +76,10 @@ const Product = mongoose.model("Product", {
   old_price: { type: Number },
   date: { type: Date, default: Date.now },
   avilable: { type: Boolean, default: true },
+  shippingAddress: {
+    type: String,
+    required: true
+  },
 });
 
 
@@ -124,10 +130,12 @@ app.post('/signup', async (req, res) => {
     cart[i] = 0;
   }
   const user = new Users({
-    name: req.body.username,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
     email: req.body.email,
     password: req.body.password,
     cartData: cart,
+    shippingAddress: req.body.shippingAddress,
   });
   await user.save();
   const data = {
@@ -226,6 +234,7 @@ app.post("/addproduct", async (req, res) => {
     category: req.body.category,
     new_price: req.body.new_price,
     old_price: req.body.old_price,
+    shippingAddress: req.body.shippingAddress,
   });
   await product.save();
   console.log("Saved");
@@ -245,3 +254,8 @@ app.listen(port, (error) => {
   if (!error) console.log("Server Running on port " + port);
   else console.log("Error : ", error);
 });
+
+// 这是后端的主要文件，使用Express框架来处理HTTP请求。
+// 包含用户和产品的Schema定义，以及相关的API端点。
+// 使用MongoDB进行数据库连接和操作。
+// 主要功能包括用户注册、登录、产品管理和购物车操作。
