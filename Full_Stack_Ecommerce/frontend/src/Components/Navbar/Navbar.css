@@ -84,6 +84,23 @@
     display: none;
 }
 
+.welcome-text {
+    margin-right: 10px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .disabled-link {
+    cursor: pointer;
+    opacity: 0.7;
+    display: inline-block;
+    margin: 0 5px;
+  }
+  
+  .disabled-link img {
+    filter: grayscale(70%);
+  }
+
 /* -------- media query---------- */
 @media(max-width:900px){
     .nav{

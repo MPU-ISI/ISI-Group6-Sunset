@@ -11,18 +11,32 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB 限制
+});
 
 // Upload route
 router.post("/", upload.single('product'), (req, res) => {
   try {
+    // 检查文件是否存在
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false, 
+        errors: "No file uploaded"
+      });
+    }
+
     res.json({
-      success: 1,
+      success: true, // 将1改为true以与前端代码匹配
       image_url: `/images/${req.file.filename}`
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: 0, error: "Upload failed" });
+    console.error("Upload error:", error);
+    res.status(500).json({ 
+      success: false, 
+      errors: error.message || "Upload failed" // 将error改为errors
+    });
   }
 });
 

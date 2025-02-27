@@ -159,3 +159,202 @@
         height: 300px;
     }
 }
+/* 现有的CSS保持不变 */
+
+/* 添加以下新的样式 */
+
+/* 选项样式 */
+.productdisplay-right-options {
+    margin-top: 30px;
+}
+
+.productdisplay-right-options h1 {
+    color: #656565;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.productdisplay-right-option-values {
+    display: flex;
+    margin: 20px 0px;
+    gap: 15px;
+}
+
+.productdisplay-right-option-values div {
+    padding: 16px 20px;
+    background: #fbfbfb;
+    border: 1px solid #ebebeb;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.productdisplay-right-option-values div.selected {
+    background-color: #FF4141;
+    color: white;
+    border-color: #FF4141;
+}
+
+/* 库存状态样式 */
+.productdisplay-right-inventory {
+    margin-top: 15px;
+    font-size: 16px;
+    color: #656565;
+}
+
+.in-stock {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+.out-of-stock {
+    color: #FF4141;
+    font-weight: 600;
+}
+
+/* 数量选择器样式 */
+.productdisplay-right-quantity {
+    margin-top: 30px;
+}
+
+.productdisplay-right-quantity h1 {
+    color: #656565;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    margin: 20px 0px;
+}
+
+.quantity-selector button {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ebebeb;
+    background: #fbfbfb;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.quantity-selector span {
+    width: 60px;
+    text-align: center;
+    border-top: 1px solid #ebebeb;
+    border-bottom: 1px solid #ebebeb;
+    height: 40px;
+    line-height: 40px;
+    font-size: 16px;
+}
+
+/* 属性样式 */
+.productdisplay-right-attributes {
+    margin-top: 25px;
+    border-top: 1px solid #ebebeb;
+    padding-top: 15px;
+}
+
+.productdisplay-right-attributes h1 {
+    color: #3d3d3d;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.attribute-item {
+    margin-top: 8px;
+    font-size: 16px;
+    color: #656565;
+}
+
+.attribute-name {
+    font-weight: 600;
+}
+
+/* 禁用按钮样式 */
+.productdisplay-right button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* 加载状态 */
+.loading {
+    text-align: center;
+    padding: 60px 0;
+    font-size: 18px;
+    color: #656565;
+}
+
+.no-products {
+    text-align: center;
+    padding: 60px 0;
+    font-size: 18px;
+    color: #656565;
+}
+
+/* 为新增部分添加媒体查询响应式设计 */
+@media(max-width:1024px){
+    .productdisplay-right-option-values div {
+        padding: 14px 16px;
+    }
+    
+    .quantity-selector button {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .quantity-selector span {
+        width: 50px;
+        height: 36px;
+        line-height: 36px;
+    }
+}
+
+@media(max-width:900px){
+    .productdisplay-right-option-values div {
+        padding: 12px 14px;
+    }
+    
+    .productdisplay-right-options {
+        margin-top: 20px;
+    }
+}
+
+@media(max-width:500px){
+    .productdisplay-right-options h1,
+    .productdisplay-right-quantity h1,
+    .productdisplay-right-attributes h1 {
+        font-size: 16px;
+    }
+    
+    .productdisplay-right-option-values {
+        margin: 10px 0;
+        gap: 10px;
+    }
+    
+    .productdisplay-right-option-values div {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    
+    .quantity-selector {
+        margin: 10px 0;
+    }
+    
+    .quantity-selector button {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .quantity-selector span {
+        width: 40px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 14px;
+    }
+    
+    .attribute-item {
+        font-size: 14px;
+    }
+}
