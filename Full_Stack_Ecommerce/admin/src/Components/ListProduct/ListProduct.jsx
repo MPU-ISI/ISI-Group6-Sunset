@@ -13,11 +13,16 @@ const ListProduct = () => {
   const fetchInfo = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${backend_url}/api/products/all`);
+      // 使用admin专属路由获取所有产品
+      const res = await fetch(`${backend_url}/api/products/adminAll`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       setAllProducts(data);
     } catch (error) {
       console.error("Error fetching products:", error);
+      alert("Failed to load products list");
     } finally {
       setLoading(false);
     }
@@ -43,6 +48,10 @@ const ListProduct = () => {
         body: JSON.stringify({ id: id }),
       });
       
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const result = await response.json();
       if (result.success) {
         await fetchInfo();
@@ -60,7 +69,8 @@ const ListProduct = () => {
   const fetchProductDetails = async (id) => {
     setLoading(true);
     try {
-      const response = await fetch(`${backend_url}/products/detail/${id}`);
+      // 使用admin专属路由获取产品详情
+      const response = await fetch(`${backend_url}/api/products/adminDetail/${id}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -77,7 +87,8 @@ const ListProduct = () => {
 
   const viewProductDetails = async (product) => {
     setSelectedProduct(product);
-    await fetchProductDetails(product.id);
+    // 使用productID或id
+    await fetchProductDetails(product.productID || product.id);
   }
 
   const closeDetails = () => {
@@ -86,18 +97,26 @@ const ListProduct = () => {
     setProductDetails(null);
   }
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  }
+
   return (
     <div className="listproduct">
       <h1>All Products List</h1>
       {loading && <div className="loading-indicator">Loading...</div>}
       
       <div className="listproduct-format-main">
+        <p>Product ID</p>
         <p>Products</p>
         <p>Title</p>
         <p>Old Price</p>
         <p>New Price</p>
         <p>Category</p>
         <p>Type</p>
+        <p>Added Date</p>
+        <p>Added</p>
         <p>Actions</p>
       </div>
       <div className="listproduct-allproducts">
@@ -105,24 +124,28 @@ const ListProduct = () => {
         {allproducts.map((product, index) => (
           <div key={index}>
             <div className="listproduct-format-main listproduct-format">
-              <img className="listproduct-product-icon" src={backend_url + product.image} alt="" />
+              <p className="product-id">{product.productID || product.id}</p>
+              <img 
+                className="listproduct-product-icon" 
+                src={product.image.startsWith('http') ? product.image : backend_url + product.image} 
+                alt="" 
+              />
               <p className="cartitems-product-title">{product.name}</p>
               <p>{currency}{product.old_price}</p>
               <p>{currency}{product.new_price}</p>
               <p>{product.category}</p>
-              <p>{product.isConfigurable ? "Configurable" : "Simple"}</p>
+              <p className="hide-on-mobile">{product.isConfigurable ? "Configurable" : "Simple"}</p>
+              <p className="hide-on-mobile">{formatDate(product.date)}</p>
               <div className="listproduct-actions">
-                {product.isConfigurable && (
-                  <button 
-                    className="view-details-btn"
-                    onClick={() => viewProductDetails(product)}
-                  >
-                    Details
-                  </button>
-                )}
+                <button 
+                  className="view-details-btn"
+                  onClick={() => viewProductDetails(product)}
+                >
+                  Details
+                </button>
                 <img 
                   className="listproduct-remove-icon" 
-                  onClick={() => { removeProduct(product.id) }} 
+                  onClick={() => { removeProduct(product.productID || product.id) }} 
                   src={cross_icon} 
                   alt="Remove" 
                 />
@@ -133,24 +156,110 @@ const ListProduct = () => {
         ))}
       </div>
 
-      {/* 产品详情模态框 */}
+      {/* 产品详情模态框 - 增强版 */}
       {showDetails && selectedProduct && productDetails && (
         <div className="product-details-modal">
           <div className="modal-content">
             <span className="close" onClick={closeDetails}>&times;</span>
             <h2>{selectedProduct.name} Details</h2>
             
+            <div className="product-basic-info">
+              <div className="product-images">
+                <div className="main-image">
+                  <h4>Main Image</h4>
+                  <img 
+                    src={productDetails.image.startsWith('http') ? 
+                      productDetails.image : 
+                      backend_url + productDetails.image} 
+                    alt={productDetails.name} 
+                  />
+                </div>
+                
+                {productDetails.additional_images && productDetails.additional_images.length > 0 && (
+                  <div className="additional-images">
+                    <h4>Additional Images</h4>
+                    <div className="image-grid">
+                      {productDetails.additional_images.map((img, idx) => (
+                        <img 
+                          key={idx} 
+                          src={img.startsWith('http') ? img : backend_url + img} 
+                          alt={`${productDetails.name} ${idx+1}`} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="product-info-details">
+                <h3>Product Information</h3>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td><strong>Product ID:</strong></td>
+                      <td>{productDetails.productID || productDetails.id}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Name:</strong></td>
+                      <td>{productDetails.name}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Description:</strong></td>
+                      <td>{productDetails.description}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Category:</strong></td>
+                      <td>{productDetails.category}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Category ID:</strong></td>
+                      <td>{productDetails.categoryID}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Regular Price:</strong></td>
+                      <td>{currency}{productDetails.old_price}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Sale Price:</strong></td>
+                      <td>{currency}{productDetails.new_price}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Type:</strong></td>
+                      <td>{productDetails.isConfigurable ? "Configurable" : "Simple"}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Available:</strong></td>
+                      <td>{productDetails.available ? "Yes" : "No"}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Added Date:</strong></td>
+                      <td>{formatDate(productDetails.date)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
             {/* 属性部分 */}
             {productDetails.attributes && productDetails.attributes.length > 0 && (
               <div className="product-attributes">
                 <h3>Product Attributes</h3>
-                <ul>
-                  {productDetails.attributes.map((attr, index) => (
-                    <li key={index}>
-                      <strong>{attr.attributeName}</strong>: {attr.details}
-                    </li>
-                  ))}
-                </ul>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Attribute Name</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productDetails.attributes.map((attr, index) => (
+                      <tr key={index}>
+                        <td><strong>{attr.attributeName}</strong></td>
+                        <td>{attr.details}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
             
@@ -158,43 +267,68 @@ const ListProduct = () => {
             {productDetails.options && productDetails.options.length > 0 && (
               <div className="product-options">
                 <h3>Product Options</h3>
-                <ul>
-                  {productDetails.options.map((option, index) => (
-                    <li key={index}>
-                      <strong>{option.option_name}</strong>: {Array.isArray(option.values) ? option.values.join(', ') : ''}
-                    </li>
-                  ))}
-                </ul>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Option Name</th>
+                      <th>Values</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productDetails.options.map((option, index) => (
+                      <tr key={index}>
+                        <td><strong>{option.option_name}</strong></td>
+                        <td>
+                          {Array.isArray(option.values) 
+                            ? option.values.join(', ') 
+                            : (option.values || '')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
             
             {/* SKU部分 */}
             {productDetails.skus && productDetails.skus.length > 0 && (
               <div className="product-skus">
-                <h3>Product SKUs</h3>
+                <h3>Product SKUs ({productDetails.skus.length})</h3>
                 <table>
                   <thead>
                     <tr>
-                      <th>Configuration</th>
                       <th>SKU Code</th>
-                      <th>Quantity</th>
+                      <th>Configuration</th>
                       <th>Price</th>
+                      <th>Quantity</th>
                       <th>Status</th>
+                      <th>Image</th>
                     </tr>
                   </thead>
                   <tbody>
                     {productDetails.skus.map((sku, index) => (
                       <tr key={index}>
+                        <td>{sku.sku_code}</td>
                         <td>
-                          {sku.configurable_values ? 
+                          {sku.configurable_values && typeof sku.configurable_values === 'object' ? 
                             Object.entries(sku.configurable_values).map(([key, value]) => (
-                              <span key={key}>{key}: {value}, </span>
+                              <div key={key}><strong>{key}:</strong> {value}</div>
                             )) : 'N/A'}
                         </td>
-                        <td>{sku.sku_code}</td>
-                        <td>{sku.quantity}</td>
                         <td>{currency}{sku.price}</td>
+                        <td>{sku.quantity}</td>
                         <td>{sku.inventory_status}</td>
+                        <td>
+                          {sku.image_url && (
+                            <img 
+                              src={sku.image_url.startsWith('http') ? 
+                                sku.image_url : 
+                                backend_url + sku.image_url} 
+                              alt={sku.sku_code}
+                              className="sku-thumbnail" 
+                            />
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

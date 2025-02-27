@@ -1,4 +1,4 @@
-// 文件位置：/server/models/ProductAttribute.js
+// models/ProductAttribute.js
 const mongoose = require('mongoose');
 
 const ProductAttributeSchema = new mongoose.Schema({

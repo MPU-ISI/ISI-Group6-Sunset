@@ -1,4 +1,4 @@
-// 文件位置：/server/models/ProductOption.js
+// models/ProductOption.js
 const mongoose = require('mongoose');
 
 const ProductOptionSchema = new mongoose.Schema({

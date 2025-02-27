@@ -10,7 +10,7 @@ import nav_dropdown from '../Assets/nav_dropdown.png'
 
 const Navbar = () => {
   let [menu, setMenu] = useState("shop");
-  const { getTotalCartItems } = useContext(ShopContext);
+  const { cartItems } = useContext(ShopContext);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -25,6 +25,11 @@ const Navbar = () => {
   const handleDisabledLinkClick = () => {
     alert('请先登录');
     navigate('/login');
+  }
+  
+  // 获取购物车商品总数
+  const getCartItemCount = () => {
+    return cartItems && Array.isArray(cartItems) ? cartItems.length : 0;
   }
 
   return (
@@ -46,6 +51,7 @@ const Navbar = () => {
             {user && <span className="welcome-text">欢迎, {user.firstName || user.userName || '用户'}</span>}
             <button onClick={logout}>Logout</button>
             <Link to="/cart"><img src={cart_icon} alt="cart" /></Link>
+            <div className="nav-cart-count">{getCartItemCount()}</div>
             <Link to="/wishList"><img src={wishlist_icon} alt="wishList" /></Link>
           </>
         ) : (
@@ -67,7 +73,6 @@ const Navbar = () => {
             </div>
           </>
         )}
-        <div className="nav-cart-count">{getTotalCartItems()}</div>
       </div>
     </div>
   )

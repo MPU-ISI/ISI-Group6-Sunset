@@ -1,22 +1,23 @@
+// models/Product.js
 const mongoose = require("mongoose");
 
 const ProductSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true },
+  productID: { type: Number, required: true, unique: true }, // 主要ID字段
+  id: { type: Number }, // 保留此字段以兼容旧代码
   name: { type: String, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
+  additional_images: [{ type: String }],
   category: { type: String, required: true },
   new_price: { type: Number },
   old_price: { type: Number },
   date: { type: Date, default: Date.now },
   available: { type: Boolean, default: true }, 
   
-  // 新增字段
   isConfigurable: { type: Boolean, default: false },
-  productType: { type: String, default: 'simple' }, // 'simple' 或 'configurable'
+  productType: { type: String, default: 'simple' },
   categoryID: { type: Number },
   
-  // 引用相关的其他模型
   attributes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProductAttribute' }],
   options: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProductOption' }],
   skus: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SKU' }]

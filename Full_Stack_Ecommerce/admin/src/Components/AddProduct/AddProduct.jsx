@@ -4,7 +4,8 @@ import upload_area from "../Assets/upload_area.svg";
 import { backend_url } from "../../App";
 
 const AddProduct = () => {
-  const [image, setImage] = useState(false);
+  const [mainImage, setMainImage] = useState(false);
+  const [additionalImages, setAdditionalImages] = useState([]);
   const [isConfigurable, setIsConfigurable] = useState(false);
   const [attributes, setAttributes] = useState([]);
   const [options, setOptions] = useState([]);
@@ -16,6 +17,7 @@ const AddProduct = () => {
     name: "",
     description: "",
     image: "",
+    additional_images: [],
     category: "women",
     new_price: "",
     old_price: "",
@@ -64,7 +66,8 @@ const AddProduct = () => {
           inventory_status: "in_stock",
           quantity: 0,
           price: basePrice,
-          image_url: ""
+          image_url: "",
+          image_file: null
         }]);
         return;
       }
@@ -115,44 +118,121 @@ const AddProduct = () => {
     setProductDetails({ ...productDetails, isConfigurable: !isConfigurable });
   };
 
-  const AddProduct = async () => {
-    let dataObj;
-    let product = { ...productDetails };
+  // 修改主图片上传处理
+  const handleMainImageChange = (e) => {
+    if (e.target.files[0]) {
+      setMainImage(e.target.files[0]);
+    }
+  };
 
-    // 处理图片上传
-    if (image) {
-      let formData = new FormData();
-      formData.append('product', image);
+  // 添加额外图片上传处理
+  const handleAdditionalImageChange = (e) => {
+    if (e.target.files) {
+      const newImages = [...additionalImages];
+      for (let i = 0; i < e.target.files.length; i++) {
+        newImages.push(e.target.files[i]);
+      }
+      setAdditionalImages(newImages);
+    }
+  };
 
-      await fetch(`${backend_url}/api/upload`, {
+  // 移除附加图片
+  const removeAdditionalImage = (index) => {
+    const newImages = [...additionalImages];
+    newImages.splice(index, 1);
+    setAdditionalImages(newImages);
+  };
+
+  // 为SKU添加图片
+  const handleSkuImageChange = (index, e) => {
+    if (e.target.files[0]) {
+      const updatedSkus = [...skus];
+      updatedSkus[index].image_file = e.target.files[0];
+      setSkus(updatedSkus);
+    }
+  };
+
+  // 上传单个图片的辅助函数
+  const uploadImage = async (imageFile) => {
+    let formData = new FormData();
+    formData.append('product', imageFile);
+
+    try {
+      const response = await fetch(`${backend_url}/api/upload`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
         },
         body: formData,
-      }).then((resp) => resp.json())
-        .then((data) => { dataObj = data });
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Image upload error:", error);
+      return { success: false, error: "Upload failed" };
+    }
+  };
 
-      if (dataObj.success) {
-        product.image = dataObj.image_url;
+  // 修改添加产品方法以支持多图片上传
+  const AddProduct = async () => {
+    try {
+      let product = { ...productDetails };
+      let uploadedImages = [];
+
+      // 上传主图片
+      if (mainImage) {
+        const mainImageData = await uploadImage(mainImage);
+        if (mainImageData.success) {
+          product.image = mainImageData.image_url;
+          uploadedImages.push(mainImageData.image_url);
+        } else {
+          alert("Main image upload failed");
+          return;
+        }
       } else {
-        alert("Image upload failed");
+        alert("Please select a main image");
         return;
       }
-    } else {
-      alert("Please select an image");
-      return;
-    }
 
-    // 如果是可配置产品，添加属性、选项和SKU
-    if (isConfigurable) {
-      product.attributes = attributes;
-      product.options = options;
-      product.skus = skus;
-    }
+      // 上传附加图片
+      if (additionalImages.length > 0) {
+        const additionalImagePromises = additionalImages.map(img => uploadImage(img));
+        const additionalImageResults = await Promise.all(additionalImagePromises);
+        
+        const successfulUploads = additionalImageResults
+          .filter(result => result.success)
+          .map(result => result.image_url);
+        
+        if (successfulUploads.length !== additionalImages.length) {
+          alert("Some additional images failed to upload");
+        }
+        
+        product.additional_images = successfulUploads;
+        uploadedImages = [...uploadedImages, ...successfulUploads];
+      }
 
-    // 发送产品数据到后端
-    try {
+      // 如果是可配置产品，处理SKU图片
+      if (isConfigurable) {
+        product.attributes = attributes;
+        product.options = options;
+        
+        // 处理SKU图片上传
+        const updatedSkus = [...skus];
+        for (let i = 0; i < updatedSkus.length; i++) {
+          if (updatedSkus[i].image_file) {
+            const skuImageData = await uploadImage(updatedSkus[i].image_file);
+            if (skuImageData.success) {
+              updatedSkus[i].image_url = skuImageData.image_url;
+              delete updatedSkus[i].image_file; // 删除文件对象，只保留URL
+            }
+          } else {
+            // 如果没有特定图片，使用主图片
+            updatedSkus[i].image_url = product.image;
+          }
+        }
+        product.skus = updatedSkus;
+      }
+
+      // 发送产品数据到后端
       const response = await fetch(`${backend_url}/api/products/add`, {
         method: 'POST',
         headers: {
@@ -165,24 +245,8 @@ const AddProduct = () => {
       const data = await response.json();
       
       if (data.success) {
-        alert("Product Added Successfully");
-        
-        // 重置表单
-        setProductDetails({
-          name: "",
-          description: "",
-          image: "",
-          category: "women",
-          new_price: "",
-          old_price: "",
-          isConfigurable: false,
-          categoryID: 1,
-        });
-        setImage(false);
-        setIsConfigurable(false);
-        setAttributes([]);
-        setOptions([]);
-        setSkus([]);
+        alert(`Product Added Successfully with ID: ${data.id}`);
+        resetForm();
       } else {
         alert("Failed to add product: " + (data.errors || "Unknown error"));
       }
@@ -190,6 +254,27 @@ const AddProduct = () => {
       console.error("Error adding product:", error);
       alert("Failed to add product. Please try again.");
     }
+  };
+
+  // 表单重置
+  const resetForm = () => {
+    setProductDetails({
+      name: "",
+      description: "",
+      image: "",
+      additional_images: [],
+      category: "women",
+      new_price: "",
+      old_price: "",
+      isConfigurable: false,
+      categoryID: 1,
+    });
+    setMainImage(false);
+    setAdditionalImages([]);
+    setIsConfigurable(false);
+    setAttributes([]);
+    setOptions([]);
+    setSkus([]);
   };
 
   return (
@@ -224,12 +309,37 @@ const AddProduct = () => {
         <p>Category ID</p>
         <input type="number" name="categoryID" value={productDetails.categoryID} onChange={changeHandler} placeholder="Category ID" />
       </div>
+      
+      {/* 修改主图片上传部分 */}
       <div className="addproduct-itemfield">
-        <p>Product image</p>
-        <label htmlFor="file-input">
-          <img className="addproduct-thumbnail-img" src={!image ? upload_area : URL.createObjectURL(image)} alt="" />
+        <p>Product main image</p>
+        <label htmlFor="main-image-input">
+          <img className="addproduct-thumbnail-img" src={!mainImage ? upload_area : URL.createObjectURL(mainImage)} alt="" />
         </label>
-        <input onChange={(e) => setImage(e.target.files[0])} type="file" name="image" id="file-input" accept="image/*" hidden />
+        <input onChange={handleMainImageChange} type="file" name="mainImage" id="main-image-input" accept="image/*" hidden />
+      </div>
+      
+      {/* 添加多图片上传部分 */}
+      <div className="addproduct-itemfield">
+        <p>Additional product images (optional)</p>
+        <input 
+          type="file" 
+          onChange={handleAdditionalImageChange} 
+          multiple 
+          accept="image/*" 
+          className="additional-images-input" 
+        />
+        
+        {additionalImages.length > 0 && (
+          <div className="additional-images-preview">
+            {additionalImages.map((img, index) => (
+              <div key={index} className="additional-image-item">
+                <img src={URL.createObjectURL(img)} alt={`Additional ${index}`} />
+                <button type="button" onClick={() => removeAdditionalImage(index)}>Remove</button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
       {/* 可配置产品开关 */}
@@ -320,6 +430,7 @@ const AddProduct = () => {
                     <th>SKU Code</th>
                     <th>Quantity</th>
                     <th>Price</th>
+                    <th>Image</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -351,6 +462,20 @@ const AddProduct = () => {
                           value={sku.price}
                           onChange={(e) => updateSkuField(index, 'price', parseFloat(e.target.value))}
                         />
+                      </td>
+                      <td>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => handleSkuImageChange(index, e)} 
+                        />
+                        {sku.image_file && (
+                          <img 
+                            src={URL.createObjectURL(sku.image_file)} 
+                            alt="SKU preview" 
+                            className="sku-image-preview" 
+                          />
+                        )}
                       </td>
                       <td>
                         <button onClick={() => removeSku(index)}>Remove</button>

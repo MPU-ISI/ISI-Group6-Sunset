@@ -5,58 +5,7 @@ import { ShopContext } from "../../Context/ShopContext";
 import { backend_url, currency } from "../../App";
 
 const CartItems = () => {
-  const { products, loading } = useContext(ShopContext);
-  const { cartItems, removeFromCart, getTotalCartAmount, getProductDetails } = useContext(ShopContext);
-  const [cartProducts, setCartProducts] = useState([]);
-
-  // 处理购物车项目数据，转换为易于渲染的格式
-  useEffect(() => {
-    if (loading) return;
-
-    const items = [];
-    
-    for (const itemKey in cartItems) {
-      if (cartItems[itemKey] <= 0) continue;
-      
-      // 检查是否是包含SKU的产品
-      if (itemKey.includes('-')) {
-        const [productId, skuId] = itemKey.split('-');
-        const productDetails = getProductDetails(Number(productId), Number(skuId));
-        
-        if (productDetails) {
-          items.push({
-            key: itemKey,
-            id: Number(productId),
-            skuId: Number(skuId),
-            name: productDetails.name,
-            image: productDetails.currentImage,
-            price: productDetails.currentPrice,
-            quantity: cartItems[itemKey],
-            isConfigurable: true,
-            options: productDetails.skus?.find(s => s.sku_id === Number(skuId))?.configurable_values || {}
-          });
-        }
-      } else {
-        // 普通产品
-        const product = products.find(p => p.id === Number(itemKey));
-        
-        if (product) {
-          items.push({
-            key: itemKey,
-            id: product.id,
-            skuId: null,
-            name: product.name,
-            image: product.image,
-            price: product.new_price,
-            quantity: cartItems[itemKey],
-            isConfigurable: false
-          });
-        }
-      }
-    }
-    
-    setCartProducts(items);
-  }, [cartItems, products, loading, getProductDetails]);
+  const { cartItems, removeFromCart, cartTotal, loading, updateCartItemQuantity } = useContext(ShopContext);
 
   // 格式化选项显示
   const formatOptions = (options) => {
@@ -67,6 +16,16 @@ const CartItems = () => {
     return Object.entries(options)
       .map(([name, value]) => `${name}: ${value}`)
       .join(', ');
+  };
+
+  // 增加/减少购物车中商品数量
+  const handleQuantityChange = (cartItemID, currentQuantity, change) => {
+    const newQuantity = currentQuantity + change;
+    if (newQuantity >= 1) {
+      updateCartItemQuantity(cartItemID, newQuantity);
+    } else if (newQuantity === 0) {
+      removeFromCart(cartItemID);
+    }
   };
 
   if (loading) {
@@ -85,40 +44,51 @@ const CartItems = () => {
       </div>
       <hr />
       
-      {cartProducts.length === 0 ? (
+      {!cartItems || cartItems.length === 0 ? (
         <div className="cart-empty">
           <p>Your cart is empty</p>
         </div>
       ) : (
-        cartProducts.map((item) => (
-          <div key={item.key}>
-            <div className="cartitems-format-main cartitems-format">
-              <img 
-                className="cartitems-product-icon" 
-                src={backend_url + item.image} 
-                alt={item.name}
-              />
-              <div className="cartitems-product-title">
-                <p>{item.name}</p>
-                {item.isConfigurable && (
-                  <span className="cartitems-product-options">
-                    {formatOptions(item.options)}
-                  </span>
-                )}
+        cartItems.map((item) => {
+          // 获取产品和SKU信息
+          const product = item.productDetails || {};
+          const sku = item.skuDetails;
+          const price = sku?.price || product.price || 0;
+          
+          return (
+            <div key={item.cartItemID}>
+              <div className="cartitems-format-main cartitems-format">
+                <img 
+                  className="cartitems-product-icon" 
+                  src={product.image ? backend_url + product.image : ""}
+                  alt={product.name || "Product"}
+                />
+                <div className="cartitems-product-title">
+                  <p>{product.name || "Product name unavailable"}</p>
+                  {sku && (
+                    <span className="cartitems-product-options">
+                      {formatOptions(sku.configurable_values)}
+                    </span>
+                  )}
+                </div>
+                <p>{currency}{price}</p>
+                <div className="cartitems-quantity-controls">
+                  <button onClick={() => handleQuantityChange(item.cartItemID, item.quantity, -1)}>-</button>
+                  <span className="cartitems-quantity">{item.quantity}</span>
+                  <button onClick={() => handleQuantityChange(item.cartItemID, item.quantity, 1)}>+</button>
+                </div>
+                <p>{currency}{(price * item.quantity).toFixed(2)}</p>
+                <img 
+                  onClick={() => removeFromCart(item.cartItemID)} 
+                  className="cartitems-remove-icon" 
+                  src={cross_icon} 
+                  alt="Remove" 
+                />
               </div>
-              <p>{currency}{item.price}</p>
-              <button className="cartitems-quantity">{item.quantity}</button>
-              <p>{currency}{(item.price * item.quantity).toFixed(2)}</p>
-              <img 
-                onClick={() => removeFromCart(item.id, item.skuId)} 
-                className="cartitems-remove-icon" 
-                src={cross_icon} 
-                alt="Remove" 
-              />
+              <hr />
             </div>
-            <hr />
-          </div>
-        ))
+          );
+        })
       )}
       
       <div className="cartitems-down">
@@ -127,7 +97,7 @@ const CartItems = () => {
           <div>
             <div className="cartitems-total-item">
               <p>Subtotal</p>
-              <p>{currency}{getTotalCartAmount().toFixed(2)}</p>
+              <p>{currency}{cartTotal.toFixed(2)}</p>
             </div>
             <hr />
             <div className="cartitems-total-item">
@@ -137,7 +107,7 @@ const CartItems = () => {
             <hr />
             <div className="cartitems-total-item">
               <h3>Total</h3>
-              <h3>{currency}{getTotalCartAmount().toFixed(2)}</h3>
+              <h3>{currency}{cartTotal.toFixed(2)}</h3>
             </div>
           </div>
           <button>PROCEED TO CHECKOUT</button>

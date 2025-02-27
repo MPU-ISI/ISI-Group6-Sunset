@@ -1,4 +1,4 @@
-// 文件位置：/server/models/Images.js
+// models/Images.js
 const mongoose = require('mongoose');
 
 const ImagesSchema = new mongoose.Schema({

@@ -250,3 +250,109 @@
 .configurable-product-section button:hover {
   background: #4a68f8;
 }
+
+/* 多图片上传相关样式 */
+.additional-images-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 50px;
+  border-radius: 4px;
+  padding: 10px 15px;
+  border: 1px solid #c3c3c3;
+  outline: none;
+  color: #7b7b7b;
+  font-family: Poppins;
+  font-size: 14px;
+  background-color: white;
+  margin-top: 10px;
+}
+
+.additional-images-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+}
+
+.additional-image-item {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.additional-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 8px;
+}
+
+.additional-image-item button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s ease;
+}
+
+.additional-image-item button:hover {
+  background: rgba(255, 0, 0, 0.9);
+}
+
+/* SKU图片预览样式 */
+.sku-image-preview {
+  display: block;
+  max-width: 60px;
+  max-height: 60px;
+  margin-top: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+}
+
+/* SKU图片上传样式 */
+.skus-table td input[type="file"] {
+  width: 100%;
+  padding: 6px;
+  height: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .additional-images-preview {
+    justify-content: center;
+  }
+  
+  .attribute-input, .option-input {
+    flex-direction: column;
+  }
+  
+  .skus-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

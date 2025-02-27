@@ -53,24 +53,6 @@
 .productdisplay-right-price-new{
     color: #ff4141;
 }
-.productdisplay-right-size h1{
-    margin-top: 30px;
-    color: #656565;
-    font-size: 18px;
-    font-weight: 600;
-}
-.productdisplay-right-sizes{
-    display: flex;
-    margin: 20px 0px;
-    gap: 15px;
-}
-.productdisplay-right-sizes div{
-    padding: 16px 20px;
-    background: #fbfbfb;
-    border: 1px solid #ebebeb;
-    border-radius: 3px;
-    cursor: pointer;
-}
 .productdisplay-right button{
     padding: 20px 40px;
     width: 200px;
@@ -83,85 +65,16 @@
     outline: none;
     cursor: pointer;
 }
+.productdisplay-right button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
 .productdisplay-right-category{
     margin-top: 10px;
 }
 .productdisplay-right-category span{
     font-weight: 600;
 }
-
-/* ----- media query------- */
-
-
-@media(max-width:1024px){
-    .productdisplay{
-        padding: 0px 8%;
-    }
-    .productdisplay-img-list{
-        gap: 10px;
-    }
-    .productdisplay-img-list img{
-        height: 90px;
-    }
-    .productdisplay-main-img{
-        height: 400px;
-    }
-    
-}
-@media(max-width:900px){
-    .productdisplay{
-        gap: 20px;
-    }
-    .productdisplay-left{
-        gap: 10px;
-    }
-    .productdisplay-img-list{
-        gap: 10px;
-    }
-    .productdisplay-img-list img{
-        height: 80px;
-    }
-    .productdisplay-main-img{
-        height: 350px;
-    }
-    
-}
-@media(max-width:800px){
-    .productdisplay{
-        flex-wrap: wrap;
-    }
-    .productdisplay-left{
-        width: 100%;
-        justify-content: center;
-    }
-}
-@media(max-width:500px){
-    .productdisplay-right h1 {
-        font-size: 20px;
-    }
-    .productdisplay-right-prices {
-        margin: 15px 0;
-        font-size: 18px;
-    }
-    .productdisplay-right-size h1{
-        margin-top: 15px;
-    }
-    .productdisplay-right-size h1{
-        margin: 10px 0;
-    }
-    .productdisplay-right-size div{
-        font-size: 14px;
-    }
-    .productdisplay-img-list img{
-        height:68px;
-    }
-    .productdisplay-main-img{
-        height: 300px;
-    }
-}
-/* 现有的CSS保持不变 */
-
-/* 添加以下新的样式 */
 
 /* 选项样式 */
 .productdisplay-right-options {
@@ -236,6 +149,8 @@
     cursor: pointer;
     font-size: 18px;
     font-weight: 600;
+    padding: 0;
+    margin: 0;
 }
 
 .quantity-selector span {
@@ -272,13 +187,7 @@
     font-weight: 600;
 }
 
-/* 禁用按钮样式 */
-.productdisplay-right button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-}
-
-/* 加载状态 */
+/* 加载和提示信息样式 */
 .loading {
     text-align: center;
     padding: 60px 0;
@@ -286,15 +195,41 @@
     color: #656565;
 }
 
-.no-products {
-    text-align: center;
-    padding: 60px 0;
-    font-size: 18px;
-    color: #656565;
+.status-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 10px;
 }
 
-/* 为新增部分添加媒体查询响应式设计 */
+.status-message.success {
+    background-color: #e6f7e6;
+    border: 1px solid #a3d9a3;
+    color: #2c662d;
+}
+
+.status-message.error {
+    background-color: #fbe7e7;
+    border: 1px solid #ffa8a8;
+    color: #c62828;
+}
+
+/* ----- media query------- */
+
 @media(max-width:1024px){
+    .productdisplay{
+        padding: 0px 8%;
+    }
+    .productdisplay-img-list{
+        gap: 10px;
+    }
+    .productdisplay-img-list img{
+        height: 90px;
+    }
+    .productdisplay-main-img{
+        height: 400px;
+    }
     .productdisplay-right-option-values div {
         padding: 14px 16px;
     }
@@ -312,6 +247,21 @@
 }
 
 @media(max-width:900px){
+    .productdisplay{
+        gap: 20px;
+    }
+    .productdisplay-left{
+        gap: 10px;
+    }
+    .productdisplay-img-list{
+        gap: 10px;
+    }
+    .productdisplay-img-list img{
+        height: 80px;
+    }
+    .productdisplay-main-img{
+        height: 350px;
+    }
     .productdisplay-right-option-values div {
         padding: 12px 14px;
     }
@@ -321,7 +271,24 @@
     }
 }
 
+@media(max-width:800px){
+    .productdisplay{
+        flex-wrap: wrap;
+    }
+    .productdisplay-left{
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 @media(max-width:500px){
+    .productdisplay-right h1 {
+        font-size: 20px;
+    }
+    .productdisplay-right-prices {
+        margin: 15px 0;
+        font-size: 18px;
+    }
     .productdisplay-right-options h1,
     .productdisplay-right-quantity h1,
     .productdisplay-right-attributes h1 {
@@ -353,8 +320,61 @@
         line-height: 32px;
         font-size: 14px;
     }
-    
+    .productdisplay-img-list img{
+        height: 68px;
+    }
+    .productdisplay-main-img{
+        height: 300px;
+    }
     .attribute-item {
         font-size: 14px;
+    }
+}
+
+/* 添加到愿望单按钮样式 */
+.add-to-wishlist-button {
+    padding: 20px 40px;
+    width: 200px;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    background: #6B7FD7; /* 使用不同颜色与购物车按钮区分 */
+    margin-bottom: 25px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    margin-left: 15px; /* 与购物车按钮保持一定距离 */
+}
+
+.add-to-wishlist-button:hover {
+    background: #5569C9;
+}
+
+.add-to-wishlist-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.add-to-wishlist-button.loading {
+    background-color: #8a9be0;
+}
+
+/* 按钮组容器 */
+.productdisplay-right-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* 响应式调整 */
+@media(max-width:800px) {
+    .add-to-wishlist-button, .add-to-cart-button {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .productdisplay-right-buttons {
+        flex-direction: column;
+        width: 100%;
     }
 }
