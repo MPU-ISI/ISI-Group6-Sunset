@@ -11,18 +11,22 @@ router.post('/login', async (req, res) => {
   try {
     // 修改为使用 email 或 userName 登录
     const { email, userName, password } = req.body;
-    
+    console.log("Login attempt:", { email, userName });
+    const allUsers = await Users.find({});
+    console.log("数据库中的所有用户:", allUsers.map(u => ({email: u.email, userName: u.userName})));
     let user;
     if (email) {
       user = await Users.findOne({ email });
+      console.log("查询结果 (email):", user);
     } else if (userName) {
       user = await Users.findOne({ userName });
+      console.log("查询结果 (userName):", user);
     } else {
       return res.status(400).json({ success, errors: "请提供电子邮箱或用户名" });
     }
     
     if (user) {
-      const passCompare = req.body.password === user.password;
+      const passCompare = password === user.password;
       if (passCompare) {
         const data = {
           user: {

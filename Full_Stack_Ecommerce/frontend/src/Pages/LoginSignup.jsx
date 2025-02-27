@@ -4,39 +4,70 @@ import "./CSS/LoginSignup.css";
 const LoginSignup = () => {
   const [state, setState] = useState("Login");
   
-  // 更新表单数据以匹配新的用户模型
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
     password: "",
     firstName: "",
     lastName: "",
-    address: ""
+    address: "",
+    loginIdentifier: "" // 新增用于登录的统一字段
   });
 
   const changeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const resetForm = () => {
+    setFormData({
+      userName: "",
+      email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      address: "",
+      loginIdentifier: ""
+    });
+  };
+
+  // 修改状态切换函数
+  const switchMode = (newState) => {
+    setState(newState);
+    resetForm();
+  };
+
   const login = async () => {
     try {
-      // 更新 API 端点以匹配新的路由
+      // 验证输入
+      if (!formData.loginIdentifier || !formData.password) {
+        alert("请输入用户名/电子邮箱和密码");
+        return;
+      }
+
+      const loginData = {
+        password: formData.password
+      };
+      
+      // 根据输入判断是邮箱还是用户名
+      if (formData.loginIdentifier.includes('@')) {
+        loginData.email = formData.loginIdentifier;
+      } else {
+        loginData.userName = formData.loginIdentifier;
+      }
+      
+      console.log("登录数据:", loginData); // 调试用
+      
       const response = await fetch('http://localhost:4000/api/auth/login', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          // 支持使用电子邮箱或用户名登录
-          email: formData.email,
-          userName: formData.userName,
-          password: formData.password
-        }),
+        body: JSON.stringify(loginData),
       });
 
       const dataObj = await response.json();
-      console.log(dataObj);
+      console.log("登录响应:", dataObj); // 调试用
       
       if (dataObj.success) {
         localStorage.setItem('auth-token', dataObj.token);
@@ -62,17 +93,26 @@ const LoginSignup = () => {
         return;
       }
       
-      // 更新 API 端点以匹配新的路由
+      console.log("注册数据:", formData); // 调试用
+      
       const response = await fetch('http://localhost:4000/api/auth/signup', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          userName: formData.userName,
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          address: formData.address
+        }),
       });
 
       const dataObj = await response.json();
+      console.log("注册响应:", dataObj); // 调试用
       
       if (dataObj.success) {
         localStorage.setItem('auth-token', dataObj.token);
@@ -119,25 +159,22 @@ const LoginSignup = () => {
                 value={formData.lastName} 
                 onChange={changeHandler}
               />
+              <input 
+                type="email" 
+                placeholder="电子邮箱" 
+                name="email" 
+                value={formData.email} 
+                onChange={changeHandler}
+                required
+              />
             </>
           ) : (
-            // 登录时提供用户名或邮箱的选项
+            // 使用单一字段处理登录
             <input 
               type="text" 
               placeholder="用户名或电子邮箱" 
-              name={formData.email.includes('@') ? "email" : "userName"} 
-              value={formData.email.includes('@') ? formData.email : formData.userName} 
-              onChange={changeHandler}
-              required
-            />
-          )}
-          
-          {state === "Sign Up" && (
-            <input 
-              type="email" 
-              placeholder="电子邮箱" 
-              name="email" 
-              value={formData.email} 
+              name="loginIdentifier" 
+              value={formData.loginIdentifier} 
               onChange={changeHandler}
               required
             />
@@ -169,11 +206,11 @@ const LoginSignup = () => {
 
         {state === "Login" ? (
           <p className="loginsignup-login">
-            还没有账号? <span onClick={() => { setState("Sign Up") }}>点击这里注册</span>
+            还没有账号? <span onClick={() => switchMode("Sign Up")}>点击这里注册</span>
           </p>
         ) : (
           <p className="loginsignup-login">
-            已有账号? <span onClick={() => { setState("Login") }}>点击这里登录</span>
+            已有账号? <span onClick={() => switchMode("Login")}>点击这里登录</span>
           </p>
         )}
 
