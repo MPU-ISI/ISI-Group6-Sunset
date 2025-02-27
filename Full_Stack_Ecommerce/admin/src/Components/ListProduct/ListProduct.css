@@ -43,8 +43,9 @@
 .listproduct-allproducts::-webkit-scrollbar{
     display: none;
 }
-.productIMG{
-  width: 110%;
+.productIMG {
+  width: 150px;
+  height: 187.5px;
 }
 @media(max-width:800px){
   .listproduct {
