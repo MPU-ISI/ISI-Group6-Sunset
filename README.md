@@ -4,7 +4,7 @@
 
 ```
 $ git clone git@github.com:basir/node-react-ecommerce.git
-$ cd node-react-ecommerce
+$ cd node-react-ecommerceno
 ```
 
 ### 2. Install MongoDB
@@ -17,6 +17,7 @@ Download it from here: https://docs.mongodb.com/manual/administration/install-co
 $ npm install
 $ npm start
 ```
+,
 
 ### 4. Run Frontend
 
@@ -46,7 +47,3 @@ $ npm start
 
 - Q/A: https://webacademy.pro/oldamazona
 - Contact Instructor: [Basir](mailto:basir.jafarzadeh@gmail.com)
-   
-
-
-   //test
