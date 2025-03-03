@@ -59,21 +59,15 @@ const LoginSignup = () => {
       <div className="loginsignup-container">
         <h1>{state}</h1>
         <div className="loginsignup-fields">
-<<<<<<< HEAD
-          {state === "Sign Up" ? <input type="text" placeholder="Your name" name="username" value={formData.username} onChange={changeHandler} /> : <></>}
+          {state === "Sign Up" ?
+            <>
+              <input type="text" placeholder="First Name" name="firstName" value={formData.firstName} onChange={changeHandler} />
+              <input type="text" placeholder="Last Name" name="lastName" value={formData.lastName} onChange={changeHandler} />
+              <input type="text" placeholder="Shipping Address" name="shippingAddress" value={formData.shippingAddress} onChange={changeHandler} />
+            </>
+            : <></>}
           <input type="email" placeholder="Email address" name="email" value={formData.email} onChange={changeHandler} />
           <input type="password" placeholder="Password" name="password" value={formData.password} onChange={changeHandler} />
-=======
-          {state==="Sign Up"?
-            <>
-              <input type="text" placeholder="First Name" name="firstName" value={formData.firstName} onChange={changeHandler}/>
-              <input type="text" placeholder="Last Name" name="lastName" value={formData.lastName} onChange={changeHandler}/>
-              <input type="text" placeholder="Shipping Address" name="shippingAddress" value={formData.shippingAddress} onChange={changeHandler}/>
-            </>
-          :<></>}
-          <input type="email" placeholder="Email address" name="email" value={formData.email} onChange={changeHandler}/>
-          <input type="password" placeholder="Password" name="password" value={formData.password} onChange={changeHandler}/>
->>>>>>> f033aa26f85579e47be453bf9db75b19738b2501
         </div>
 
         <button onClick={() => { state === "Login" ? login() : signup() }}>Continue</button>
@@ -92,5 +86,3 @@ const LoginSignup = () => {
 };
 
 export default LoginSignup;
-
-
