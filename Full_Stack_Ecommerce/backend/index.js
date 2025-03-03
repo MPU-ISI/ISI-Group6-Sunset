@@ -1,42 +1,35 @@
+// index.js
 const express = require("express");
-const app = express();
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const multer = require("multer");
-const path = require("path");
 const cors = require("cors");
+const path = require("path");
+const mongoose = require("mongoose");
+require("./config/db"); // Database connection
+
+const app = express();
 const port = process.env.PORT || 4000;
 
+// 添加错误处理以捕获连接问题
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.once('open', () => {
+  console.log('MongoDB connected successfully');
+});
+
+// Middleware
 app.use(express.json());
 app.use(cors());
-
-// Database Connection With MongoDB
-mongoose.connect("mongodb+srv://p2211681:GYx18688388595@ecommerce.82ace.mongodb.net/Ecommerce");
-
-// paste your mongoDB Connection string above with password
-// password should not contain '@' special character
-
-
-//Image Storage Engine 
-const storage = multer.diskStorage({
-  destination: './upload/images',
-  filename: (req, file, cb) => {
-    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
-  }
-})
-const upload = multer({ storage: storage })
-app.post("/upload", upload.single('product'), (req, res) => {
-  res.json({
-    success: 1,
-    image_url: `/images/${req.file.filename}`
-  })
-})
-
-
-// Route for Images folder
 app.use('/images', express.static('upload/images'));
 
+// Routes
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/products", require("./routes/products"));
+app.use("/api/cart", require("./routes/cart"));
+app.use("/api/upload", require("./routes/upload"));
+app.use("/api/wishlist", require("./routes/wishlist"));
 
+<<<<<<< HEAD
 // MiddleWare to fetch user from token
 const fetchuser = async (req, res, next) => {
   const token = req.header("auth-token");
@@ -84,10 +77,14 @@ const Product = mongoose.model("Product", {
 
 
 // ROOT API Route For Testing
+=======
+// Root route
+>>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
 app.get("/", (req, res) => {
-  res.send("Root");
+  res.send("API is running");
 });
 
+<<<<<<< HEAD
 
 // Create an endpoint at ip/login for login the user and giving auth-token
 app.post('/login', async (req, res) => {
@@ -247,6 +244,15 @@ app.post("/removeproduct", async (req, res) => {
   await Product.findOneAndDelete({ id: req.body.id });
   console.log("Removed");
   res.json({ success: true, name: req.body.name })
+=======
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    errors: err.message || "Something went wrong!"
+  });
+>>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
 });
 
 // Starting Express Server
