@@ -43,30 +43,6 @@ const CartItems = () => {
         <p>Remove</p>
       </div>
       <hr />
-<<<<<<< HEAD
-      {products.map((e)=>{
-
-        if(cartItems[e.id]>0)
-        {
-          return  <div>
-                    <div className="cartitems-format-main cartitems-format">
-                      <img className="cartitems-product-icon" src={backend_url+e.image} alt="" />
-                      <p className="cartitems-product-title">
-                        <a href={`/product/${e.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                          {e.name}
-                        </a>
-                      </p>
-                      <p>{currency}{e.new_price}</p>
-                      <button className="cartitems-quantity">{cartItems[e.id]}</button>
-                      <p>{currency}{e.new_price*cartItems[e.id]}</p>
-                      <img onClick={()=>{removeFromCart(e.id)}} className="cartitems-remove-icon" src={cross_icon} alt="" />
-                    </div>
-                     <hr />
-                  </div>;
-        }
-        return null;
-      })}
-=======
       
       {!cartItems || cartItems.length === 0 ? (
         <div className="cart-empty">
@@ -114,7 +90,6 @@ const CartItems = () => {
           );
         })
       )}
->>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
       
       <div className="cartitems-down">
         <div className="cartitems-total">

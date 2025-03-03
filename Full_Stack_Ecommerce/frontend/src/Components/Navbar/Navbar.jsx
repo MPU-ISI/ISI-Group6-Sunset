@@ -1,31 +1,18 @@
 import React, { useContext, useRef, useState } from 'react'
-<<<<<<< HEAD
-import { Link } from 'react-router-dom'
-=======
 import './Navbar.css'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import logo from '../Assets/logo.png'
 import cart_icon from '../Assets/cart_icon.png'
 import wishlist_icon from '../Assets/wishlist_icon.jpg'
->>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
 import { ShopContext } from '../../Context/ShopContext'
-import cart_icon from '../Assets/cart_icon.png'
-import logo from '../Assets/logo.png'
 import nav_dropdown from '../Assets/nav_dropdown.png'
-import './Navbar.css'
 
 const Navbar = () => {
-<<<<<<< HEAD
-
-  let [menu, setMenu] = useState("shop");
-  const { getTotalCartItems } = useContext(ShopContext);
-=======
   let [menu, setMenu] = useState("shop");
   const { cartItems } = useContext(ShopContext);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
->>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
 
   const menuRef = useRef();
 
@@ -59,19 +46,6 @@ const Navbar = () => {
         <li onClick={() => { setMenu("kids") }}><Link to='/kids' style={{ textDecoration: 'none' }}>Kids</Link>{menu === "kids" ? <hr /> : <></>}</li>
       </ul>
       <div className="nav-login-cart">
-<<<<<<< HEAD
-        {localStorage.getItem('auth-token')
-          ? <button onClick={() => { localStorage.removeItem('auth-token'); window.location.replace("/"); }}>Logout</button>
-          : <Link to='/login' style={{ textDecoration: 'none' }}><button>Login</button></Link>}
-        <img src={cart_icon} alt="cart" onClick={() => {
-          if (!localStorage.getItem('auth-token')) {
-            window.location.replace('/login');
-          } else {
-            window.location.replace('/cart');
-          }
-        }} />
-        <div className="nav-cart-count">{getTotalCartItems()}</div>
-=======
         {isAuthenticated ? (
           <>
             {user && <span className="welcome-text">欢迎, {user.firstName || user.userName || '用户'}</span>}
@@ -99,7 +73,6 @@ const Navbar = () => {
             </div>
           </>
         )}
->>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
       </div>
     </div>
   )

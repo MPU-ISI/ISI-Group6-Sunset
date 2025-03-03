@@ -2,59 +2,6 @@ import React, { useState } from "react";
 import "./CSS/LoginSignup.css";
 
 const LoginSignup = () => {
-<<<<<<< HEAD
-
-  const [state, setState] = useState("Login");
-  const [formData, setFormData] = useState({ username: "", email: "", password: "" });
-
-  const changeHandler = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  }
-
-  const login = async () => {
-    let dataObj;
-    await fetch('http://localhost:4000/login', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/form-data',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((resp) => resp.json())
-      .then((data) => { dataObj = data });
-    console.log(dataObj);
-    if (dataObj.success) {
-      localStorage.setItem('auth-token', dataObj.token);
-      window.location.replace("/");
-    }
-    else {
-      alert(dataObj.errors)
-    }
-  }
-
-  const signup = async () => {
-    let dataObj;
-    await fetch('http://localhost:4000/signup', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/form-data',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((resp) => resp.json())
-      .then((data) => { dataObj = data });
-
-    if (dataObj.success) {
-      localStorage.setItem('auth-token', dataObj.token);
-      window.location.replace("/");
-    }
-    else {
-      alert(dataObj.errors)
-    }
-  }
-=======
   const [state, setState] = useState("Login");
   
   const [formData, setFormData] = useState({
@@ -182,31 +129,12 @@ const LoginSignup = () => {
       alert("注册失败，请稍后再试");
     }
   };
->>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
 
   return (
     <div className="loginsignup">
       <div className="loginsignup-container">
         <h1>{state}</h1>
         <div className="loginsignup-fields">
-<<<<<<< HEAD
-          {state === "Sign Up" ?
-            <>
-              <input type="text" placeholder="First Name" name="firstName" value={formData.firstName} onChange={changeHandler} />
-              <input type="text" placeholder="Last Name" name="lastName" value={formData.lastName} onChange={changeHandler} />
-              <input type="text" placeholder="Shipping Address" name="shippingAddress" value={formData.shippingAddress} onChange={changeHandler} />
-            </>
-            : <></>}
-          <input type="email" placeholder="Email address" name="email" value={formData.email} onChange={changeHandler} />
-          <input type="password" placeholder="Password" name="password" value={formData.password} onChange={changeHandler} />
-        </div>
-
-        <button onClick={() => { state === "Login" ? login() : signup() }}>Continue</button>
-
-        {state === "Login" ?
-          <p className="loginsignup-login">Create an account? <span onClick={() => { setState("Sign Up") }}>Click here</span></p>
-          : <p className="loginsignup-login">Already have an account? <span onClick={() => { setState("Login") }}>Login here</span></p>}
-=======
           {state === "Sign Up" ? (
             <>
               <input 
@@ -285,7 +213,6 @@ const LoginSignup = () => {
             已有账号? <span onClick={() => switchMode("Login")}>点击这里登录</span>
           </p>
         )}
->>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
 
         <div className="loginsignup-agree">
           <input type="checkbox" name="agree" id="agree" />

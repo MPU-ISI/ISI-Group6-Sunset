@@ -259,17 +259,6 @@ const ProductDisplay = ({ product }) => {
             >+</button>
           </div>
         </div>
-<<<<<<< HEAD
-        <button onClick={() => {
-          if (!localStorage.getItem('auth-token')) {
-            window.location.replace('/login');
-          } else {
-            addToCart(product.id);
-          }
-        }}>ADD TO CART</button>
-        <p className="productdisplay-right-category"><span>Category :</span> Women, T-shirt, Crop Top</p>
-        <p className="productdisplay-right-category"><span>Tags :</span> Modern, Latest</p>
-=======
         
         {/* 按钮组 */}
         <div className="productdisplay-right-buttons">
@@ -325,7 +314,6 @@ const ProductDisplay = ({ product }) => {
             ))}
           </div>
         )}
->>>>>>> d7069964b49e8e1ef6498dd8437c24e94e55b43e
       </div>
     </div>
   );
