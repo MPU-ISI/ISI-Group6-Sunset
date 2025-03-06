@@ -30,7 +30,7 @@ yarn-error.log*
 .env.production.local
 
 # 锁文件（可选排除）
-# package-lock.json
+package-lock.json
 # yarn.lock
 
 # IDE 和编辑器文件

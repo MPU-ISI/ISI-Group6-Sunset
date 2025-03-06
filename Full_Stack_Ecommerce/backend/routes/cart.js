@@ -27,7 +27,13 @@ router.post('/add', fetchuser, async (req, res) => {
     }
 
     // 验证产品存在,数字和字符串转换问题
+    console.log(productID);
+    const products = await Product.find({}).select('productID');
+    const products2 = await Product.find({}).select('id');
+    console.log(products2);
+    console.log(products);
     const product = await Product.findOne({ productID });
+    console.log(product);
     if (!product) {
       return res.status(404).json({ 
         success: false, 

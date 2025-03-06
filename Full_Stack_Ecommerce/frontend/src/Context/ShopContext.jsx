@@ -1,7 +1,17 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { backend_url } from '../App';
 
-export const ShopContext = createContext(null);
+export const ShopContext = createContext({
+  products: [],
+  cartItems: [],
+  cartTotal: 0,
+  loading: false,
+  addToCart: () => Promise.resolve(false),
+  removeFromCart: () => Promise.resolve(false),
+  updateCartItemQuantity: () => Promise.resolve(false),
+  clearCart: () => Promise.resolve(false),
+  fetchCart: () => Promise.resolve(false)
+});
 
 const ShopContextProvider = (props) => {
   const [cartItems, setCartItems] = useState([]);
@@ -82,6 +92,7 @@ const ShopContextProvider = (props) => {
   const addToCart = async (productID, quantity = 1, sku_id = null) => {
     try {
       const token = localStorage.getItem('auth-token');
+      console.log(1);
       
       if (!token) {
         console.log("No auth token found, can't add to cart");

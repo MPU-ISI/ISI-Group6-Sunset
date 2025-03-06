@@ -7,7 +7,7 @@ import { WishlistContext } from '../../Context/WishlistContext';
 import { backend_url, currency } from "../../App";
 
 const ProductDisplay = ({ product }) => {
-  const { addToCart, cartLoading } = useContext(ShopContext);
+  const { addToCart, loading } = useContext(ShopContext);
   const { addToWishlist, wishlistLoading } = useContext(WishlistContext);
   
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -15,6 +15,8 @@ const ProductDisplay = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState("");
   const [addStatus, setAddStatus] = useState({ message: "", type: "" });
+
+  
 
   // 处理配置选项的变化
   useEffect(() => {
@@ -70,7 +72,8 @@ const ProductDisplay = ({ product }) => {
   const handleAddToCart = async () => {
     // 重置状态消息
     setAddStatus({ message: "", type: "" });
-    
+
+      
     try {
       let result;
       
@@ -87,6 +90,8 @@ const ProductDisplay = ({ product }) => {
         }
       } else {
         // 添加简单产品
+        console.log(product.id);
+        console.log(product.productID);
         result = await addToCart(product.id || product.productID, quantity);
       }
       
@@ -250,12 +255,12 @@ const ProductDisplay = ({ product }) => {
           <div className="quantity-selector">
             <button 
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={cartLoading || wishlistLoading}
+              disabled={loading || wishlistLoading}
             >-</button>
             <span>{quantity}</span>
             <button 
               onClick={() => setQuantity(quantity + 1)}
-              disabled={cartLoading || wishlistLoading}
+              disabled={loading || wishlistLoading}
             >+</button>
           </div>
         </div>
@@ -264,16 +269,16 @@ const ProductDisplay = ({ product }) => {
         <div className="productdisplay-right-buttons">
           {/* 添加到购物车按钮 */}
           <button 
-            className={`add-to-cart-button ${cartLoading ? "loading" : ""}`}
+            className={`add-to-cart-button ${loading ? "loading" : ""}`}
             onClick={handleAddToCart}
             disabled={
-              cartLoading || 
+              loading || 
               wishlistLoading ||
               (product.isConfigurable && !selectedSku) || 
               getInventoryStatus() !== "in_stock"
             }
           >
-            {cartLoading ? "ADDING..." : "ADD TO CART"}
+            {loading ? "ADDING..." : "ADD TO CART"}
           </button>
           
           {/* 添加到愿望单按钮 */}
@@ -282,7 +287,7 @@ const ProductDisplay = ({ product }) => {
             onClick={handleAddToWishlist}
             disabled={
               wishlistLoading || 
-              cartLoading ||
+              loading ||
               (product.isConfigurable && !selectedSku)
               // 注意：不检查库存状态，允许添加缺货商品到愿望单
             }
