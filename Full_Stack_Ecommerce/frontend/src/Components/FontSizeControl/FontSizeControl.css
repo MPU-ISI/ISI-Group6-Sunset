@@ -1,0 +1,142 @@
+.font-size-control {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1000;
+}
+
+.font-size-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #2c3e50;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.font-size-toggle:hover {
+    background: #34495e;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.font-size-icon {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ecf0f1;
+}
+
+.font-size-label {
+    font-size: 14px;
+    color: #ecf0f1;
+    font-weight: 500;
+}
+
+.font-size-options {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 10px;
+    background: #2c3e50;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.font-size-control.open .font-size-options {
+    display: flex;
+}
+
+.font-size-option {
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    color: #ecf0f1;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.font-size-option:hover {
+    background: #34495e;
+}
+
+.font-size-option.active {
+    background: #3498db;
+    color: #ffffff;
+}
+
+/* 添加动画效果 */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.font-size-control.open .font-size-options {
+    animation: slideIn 0.2s ease forwards;
+}
+
+/* 自定义滚动条样式 */
+.font-size-options::-webkit-scrollbar {
+    width: 6px;
+}
+
+.font-size-options::-webkit-scrollbar-track {
+    background: #34495e;
+    border-radius: 3px;
+}
+
+.font-size-options::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 3px;
+}
+
+.font-size-options::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .font-size-control {
+        right: 10px;
+        bottom: 10px;
+    }
+
+    .font-size-toggle {
+        padding: 8px 12px;
+    }
+
+    .font-size-label {
+        display: none;
+    }
+
+    .font-size-options {
+        min-width: 140px;
+        max-height: 250px;
+    }
+
+    .font-size-option {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}

@@ -1,18 +1,19 @@
-import Navbar from "./Components/Navbar/Navbar";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./Context/AuthContext";
-import Shop from "./Pages/Shop";
-import Cart from "./Pages/Cart";
-import WishList from "./Pages/WishList";
-import Product from "./Pages/Product";
-import Footer from "./Components/Footer/Footer";
-import ShopCategory from "./Pages/ShopCategory";
-import women_banner from "./Components/Assets/banner_women.png";
-import men_banner from "./Components/Assets/banner_mens.png";
+import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
 import kid_banner from "./Components/Assets/banner_kids.png";
+import men_banner from "./Components/Assets/banner_mens.png";
+import women_banner from "./Components/Assets/banner_women.png";
+import FontSizeControl from "./Components/FontSizeControl/FontSizeControl";
+import Footer from "./Components/Footer/Footer";
+import Navbar from "./Components/Navbar/Navbar";
+import { AuthProvider } from "./Context/AuthContext";
+import ShopContextProvider from "./Context/ShopContext";
+import WishlistContextProvider from "./Context/WishlistContext";
+import Cart from "./Pages/Cart";
 import LoginSignup from "./Pages/LoginSignup";
-import WishlistContextProvider from "./Context/WishlistContext"; 
-import ShopContextProvider from "./Context/ShopContext"; 
+import Product from "./Pages/Product";
+import Shop from "./Pages/Shop";
+import ShopCategory from "./Pages/ShopCategory";
+import WishList from "./Pages/WishList";
 
 export const backend_url = 'http://localhost:4000';
 export const currency = '$';
@@ -21,11 +22,11 @@ export const currency = '$';
 const ProtectedRoute = ({ children }) => {
   // 检查localStorage中是否有token
   const isAuthenticated = localStorage.getItem('auth-token') ? true : false;
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return children;
 };
 
@@ -48,9 +49,10 @@ function App() {
                 </Route>
                 <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
                 <Route path="/wishList" element={<ProtectedRoute><WishList /></ProtectedRoute>} />
-                <Route path="/login" element={<LoginSignup/>} />
+                <Route path="/login" element={<LoginSignup />} />
               </Routes>
               <Footer />
+              <FontSizeControl />
             </Router>
           </WishlistContextProvider>
         </ShopContextProvider>
