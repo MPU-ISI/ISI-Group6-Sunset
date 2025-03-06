@@ -340,7 +340,31 @@
   border-radius: 4px;
   background-color: #fafafa;
 }
+.skus-table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
+.skus-table th, .skus-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.configuration-cell {
+  max-width: 200px;
+}
+
+.configuration-values {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-item {
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
 /* 响应式调整 */
 @media (max-width: 768px) {
   .additional-images-preview {

@@ -19,6 +19,28 @@ const ProductDisplay = ({ product }) => {
   
 
   // 处理配置选项的变化
+
+  useEffect(() => {
+    if (product.isConfigurable) {
+      console.group("Product Configuration Debug");
+      console.log("Product:", product);
+      console.log("Options:", product.options);
+      console.log("SKUs:", product.skus);
+      
+      if (product.skus && product.skus.length > 0) {
+        // 检查SKUs中的配置值是否完整
+        const skuIssues = product.skus.filter(sku => 
+          !sku.configurable_values || Object.keys(sku.configurable_values).length === 0
+        );
+        
+        if (skuIssues.length > 0) {
+          console.warn("Found SKUs with missing configurable_values:", skuIssues);
+        }
+      }
+      
+      console.groupEnd();
+    }
+  }, [product]);
   useEffect(() => {
     // 初始化主图片
     setMainImage(backend_url + product.image);

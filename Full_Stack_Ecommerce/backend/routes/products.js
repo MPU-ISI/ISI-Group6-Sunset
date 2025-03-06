@@ -8,6 +8,7 @@ const ProductAttribute = require("../models/ProductAttribute");
 const ProductOption = require("../models/ProductOption");
 const SKU = require("../models/SKUs");
 const Image = require("../models/Images");
+const OptionValues = require("../models/OptionValues");
 
 
 // Get all products
@@ -171,19 +172,86 @@ router.post("/add", async (req, res) => {
           product.attributes = attributeIds;
         }
         
-        // 处理选项
         if (req.body.options && req.body.options.length > 0) {
           const optionsPromises = req.body.options.map(async (opt, index) => {
             // 获取最后一个选项ID
             let lastOption = await ProductOption.findOne({}).sort({option_id: -1}).session(session);
             let nextOptionID = lastOption ? lastOption.option_id + 1 : 1;
             
+            // 计算选项ID
+            const optionId = nextOptionID + index;
+            
+            // 保存选项
             const option = new ProductOption({
-              option_id: nextOptionID + index,
+              option_id: optionId,
               product_id: productID,
               option_name: opt.option_name
             });
             await option.save({ session });
+            
+            // 保存选项值
+            if (opt.values && opt.values.length > 0) {
+              console.log(`Processing ${opt.values.length} values for option ${opt.option_name}`);
+              
+              // 获取当前最大值ID (仅作为建议值，不保证唯一)
+              let maxValueId = 0;
+              try {
+                const highestValue = await OptionValues.findOne({})
+                  .sort({value_id: -1})
+                  .session(session);
+                
+                maxValueId = highestValue && highestValue.value_id 
+                  ? highestValue.value_id 
+                  : 0;
+              } catch (err) {
+                console.warn("Could not determine max value_id:", err);
+              }
+              
+              // 为每个值创建记录
+              const valuePromises = opt.values.map(async (valueName, index) => {
+                try {
+                  // 首先检查是否已存在相同选项和值名称的记录
+                  const existingValue = await OptionValues.findOne({
+                    option_id: optionId,
+                    value_name: valueName
+                  }).session(session);
+                  
+                  // 如果已存在则跳过
+                  if (existingValue) {
+                    console.log(`Value "${valueName}" already exists for option ${optionId}, skipping`);
+                    return existingValue;
+                  }
+                  
+                  // 创建新值
+                  const optionValue = new OptionValues({
+                    value_id: maxValueId + index + 1, // 仅作为建议值
+                    option_id: optionId,
+                    value_name: valueName
+                  });
+                  
+                  return await optionValue.save({ session });
+                } catch (err) {
+                  // 如果是唯一键冲突，尝试使用不同的处理方式
+                  if (err.code === 11000) {
+                    console.warn(`Conflict saving value "${valueName}". Creating without value_id.`);
+                    
+                    // 尝试不指定value_id
+                    const fallbackValue = new OptionValues({
+                      option_id: optionId,
+                      value_name: valueName
+                    });
+                    
+                    return await fallbackValue.save({ session });
+                  }
+                  throw err;
+                }
+              });
+              
+              // 等待所有值保存完成
+              await Promise.all(valuePromises);
+              console.log(`Successfully saved all values for option ${opt.option_name}`);
+            }
+                        
             return option._id;
           });
           
@@ -350,13 +418,27 @@ router.get("/adminDetail/:id", async (req, res) => {
       productID: product.productID || product.id
     }).select('image_url -_id').lean();
     
-    // 获取选项值 - 需要根据您的数据结构调整
+    // 获取选项值
     const optionsWithValues = await Promise.all((product.options || []).map(async (option) => {
-      // 假设您有一个OptionValues模型或者选项值存储在options模型中
-      // 这里可能需要根据您的实际数据结构调整
+      // 确保我们有option_id
+      const optionId = option.option_id;
+      
+      if (!optionId) {
+        console.warn(`Option missing option_id:`, option);
+        return option;
+      }
+      
+      // 查询此选项的所有值
+      const optionValues = await OptionValues.find({
+        option_id: optionId
+      }).sort({ value_id: 1 }).lean();
+      
+      console.log(`Found ${optionValues.length} values for option ${optionId}`);
+      
+      // 返回带有值的选项
       return {
         ...option,
-        // 如果values存储在其他模型中，在这里查询
+        values: optionValues.map(val => val.value_name)
       };
     }));
     

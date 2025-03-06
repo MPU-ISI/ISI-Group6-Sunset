@@ -279,9 +279,11 @@ const ListProduct = () => {
                       <tr key={index}>
                         <td><strong>{option.option_name}</strong></td>
                         <td>
-                          {Array.isArray(option.values) 
-                            ? option.values.join(', ') 
-                            : (option.values || '')}
+                        {option.values && Array.isArray(option.values) 
+                          ? option.values.join(', ') 
+                          : (typeof option.values === 'string' 
+                            ? option.values 
+                            : 'No values available')}
                         </td>
                       </tr>
                     ))}

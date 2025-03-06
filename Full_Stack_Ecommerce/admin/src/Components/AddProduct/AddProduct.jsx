@@ -46,49 +46,79 @@ const AddProduct = () => {
   };
 
   const generateSkus = () => {
+    // 清空当前SKUs
+    setSkus([]);
+    
     // 只处理有值的选项
-    const validOptions = options.filter(option => option.values.length > 0);
+    const validOptions = options.filter(option => 
+      option.option_name && 
+      option.values && 
+      (Array.isArray(option.values) ? option.values.length > 0 : option.values.trim() !== '')
+    );
+    
+    console.log("Valid options for SKU generation:", validOptions);
     
     if (validOptions.length === 0) {
-      alert("请先添加选项和值");
+      alert("请先添加至少一个有效的选项和值");
       return;
     }
     
-    // 递归生成所有可能的组合
-    const generateCombinations = (optionIndex = 0, currentCombination = {}) => {
-      if (optionIndex >= validOptions.length) {
-        // 基本价格使用主产品价格
+    // 标准化选项和值
+    const normalizedOptions = validOptions.map(opt => ({
+      option_name: opt.option_name.trim(),
+      values: Array.isArray(opt.values) 
+        ? opt.values.map(v => v.trim()).filter(v => v !== '') 
+        : opt.values.split(',').map(v => v.trim()).filter(v => v !== '')
+    }));
+    
+    console.log("Normalized options:", normalizedOptions);
+    
+    // 生成所有可能的组合
+    const generateAllCombinations = (options, index = 0, current = {}) => {
+      if (index === options.length) {
+        // 达到最后一个选项，添加当前组合
         const basePrice = parseFloat(productDetails.new_price) || 0;
         
-        setSkus(prev => [...prev, {
-          configurable_values: { ...currentCombination },
+        // 创建新的SKU对象
+        const newSku = {
+          configurable_values: { ...current }, // 复制当前组合
           sku_code: `SKU-${skus.length + 1}`,
           inventory_status: "in_stock",
           quantity: 0,
           price: basePrice,
           image_url: "",
           image_file: null
-        }]);
+        };
+        
+        console.log("Adding new SKU:", newSku);
+        setSkus(prev => [...prev, newSku]);
         return;
       }
       
-      const currentOption = validOptions[optionIndex];
-      for (const value of currentOption.values) {
-        const newCombination = { ...currentCombination };
-        newCombination[currentOption.option_name] = value;
-        generateCombinations(optionIndex + 1, newCombination);
+      // 获取当前选项
+      const option = options[index];
+      
+      // 为当前选项的每个值创建一个组合
+      for (const value of option.values) {
+        const newCurrent = { ...current };
+        newCurrent[option.option_name] = value;
+        generateAllCombinations(options, index + 1, newCurrent);
       }
     };
     
-    // 清空当前SKUs并生成新的
-    setSkus([]);
-    generateCombinations();
+    // 启动组合生成
+    generateAllCombinations(normalizedOptions);
   };
 
   const updateSkuField = (index, field, value) => {
-    const updatedSkus = [...skus];
-    updatedSkus[index][field] = value;
-    setSkus(updatedSkus);
+    setSkus(prevSkus => {
+      const updatedSkus = [...prevSkus];
+      updatedSkus[index] = {
+        ...updatedSkus[index],
+        [field]: value
+      };
+      return updatedSkus;
+    });
   };
 
   const removeAttribute = (index) => {
@@ -437,17 +467,18 @@ const AddProduct = () => {
                 <tbody>
                   {skus.map((sku, index) => (
                     <tr key={index}>
-                      <td>
-                        {Object.entries(sku.configurable_values).map(([key, value]) => (
-                          <span key={key}>{key}: {value}, </span>
-                        ))}
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          value={sku.sku_code}
-                          onChange={(e) => updateSkuField(index, 'sku_code', e.target.value)}
-                        />
+                      <td className="configuration-cell">
+                        {sku.configurable_values && typeof sku.configurable_values === 'object' ? (
+                          <div className="configuration-values">
+                            {Object.entries(sku.configurable_values).map(([optionName, optionValue]) => (
+                              <div key={optionName} className="config-item">
+                                <strong>{optionName}:</strong> {optionValue}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span>无配置</span>
+                        )}
                       </td>
                       <td>
                         <input
