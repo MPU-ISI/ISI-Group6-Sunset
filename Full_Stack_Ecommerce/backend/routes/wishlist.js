@@ -127,6 +127,74 @@ router.post('/add', auth, async (req, res) => {
   }
 });
 
-// 其他路由保持不变...
+// 从愿望单中移除商品
+router.delete('/remove/:itemId', auth, async (req, res) => {
+  try {
+    const userID = req.user.userID;
+    const wishlistItemID = parseInt(req.params.itemId);
+    
+    if (!wishlistItemID) {
+      return res.status(400).json({ success: false, errors: '缺少愿望单项目ID' });
+    }
+    
+    // 查找用户的愿望单
+    const wishlist = await Wishlist.findOne({ userID });
+    
+    if (!wishlist) {
+      return res.status(404).json({ success: false, errors: '愿望单不存在' });
+    }
+    
+    // 查找并删除愿望单项目
+    const wishlistItem = await WishlistItem.findOne({ 
+      wishlistItemID,
+      wishlistID: wishlist.wishlistID 
+    });
+    
+    if (!wishlistItem) {
+      return res.status(404).json({ success: false, errors: '愿望单项目不存在' });
+    }
+    
+    await WishlistItem.deleteOne({ wishlistItemID });
+    
+    res.json({
+      success: true,
+      message: '从愿望单中移除商品成功'
+    });
+    
+  } catch (error) {
+    console.error('从愿望单移除商品出错:', error);
+    res.status(500).json({ success: false, errors: '服务器错误' });
+  }
+});
+
+// 清空愿望单
+router.delete('/clear', auth, async (req, res) => {
+  try {
+    const userID = req.user.userID;
+    
+    // 查找用户的愿望单
+    const wishlist = await Wishlist.findOne({ userID });
+    
+    if (!wishlist) {
+      return res.status(404).json({ success: false, errors: '愿望单不存在' });
+    }
+    
+    // 删除愿望单中的所有项目
+    await WishlistItem.deleteMany({ wishlistID: wishlist.wishlistID });
+    
+    res.json({
+      success: true,
+      message: '愿望单已清空'
+    });
+    
+  } catch (error) {
+    console.error('清空愿望单出错:', error);
+    res.status(500).json({ success: false, errors: '服务器错误' });
+  }
+});
+
+module.exports = router;
+
+
 
 module.exports = router;
