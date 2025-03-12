@@ -134,11 +134,7 @@ router.delete('/remove/:itemId', auth, async (req, res) => {
     const wishlistItemID = parseInt(req.params.itemId);
     
     if (!wishlistItemID) {
-<<<<<<< HEAD
       return res.status(400).json({ success: false, errors: '无效的愿望单商品ID' });
-=======
-      return res.status(400).json({ success: false, errors: '缺少愿望单项目ID' });
->>>>>>> 19be4e79b93775654fbc271ab4d53652de366bdb
     }
     
     // 查找用户的愿望单
@@ -149,7 +145,6 @@ router.delete('/remove/:itemId', auth, async (req, res) => {
     }
     
     // 查找并删除愿望单项目
-<<<<<<< HEAD
     const deletedItem = await WishlistItem.findOneAndDelete({
       wishlistItemID,
       wishlistID: wishlist.wishlistID
@@ -163,22 +158,6 @@ router.delete('/remove/:itemId', auth, async (req, res) => {
       success: true,
       message: '从愿望单移除商品成功',
       itemId: wishlistItemID
-=======
-    const wishlistItem = await WishlistItem.findOne({ 
-      wishlistItemID,
-      wishlistID: wishlist.wishlistID 
-    });
-    
-    if (!wishlistItem) {
-      return res.status(404).json({ success: false, errors: '愿望单项目不存在' });
-    }
-    
-    await WishlistItem.deleteOne({ wishlistItemID });
-    
-    res.json({
-      success: true,
-      message: '从愿望单中移除商品成功'
->>>>>>> 19be4e79b93775654fbc271ab4d53652de366bdb
     });
     
   } catch (error) {
@@ -199,20 +178,12 @@ router.delete('/clear', auth, async (req, res) => {
       return res.status(404).json({ success: false, errors: '愿望单不存在' });
     }
     
-<<<<<<< HEAD
     // 删除该愿望单下的所有商品
-=======
-    // 删除愿望单中的所有项目
->>>>>>> 19be4e79b93775654fbc271ab4d53652de366bdb
     await WishlistItem.deleteMany({ wishlistID: wishlist.wishlistID });
     
     res.json({
       success: true,
-<<<<<<< HEAD
       message: '清空愿望单成功'
-=======
-      message: '愿望单已清空'
->>>>>>> 19be4e79b93775654fbc271ab4d53652de366bdb
     });
     
   } catch (error) {
@@ -220,12 +191,5 @@ router.delete('/clear', auth, async (req, res) => {
     res.status(500).json({ success: false, errors: '服务器错误' });
   }
 });
-<<<<<<< HEAD
-=======
-
-module.exports = router;
-
-
->>>>>>> 19be4e79b93775654fbc271ab4d53652de366bdb
 
 module.exports = router;

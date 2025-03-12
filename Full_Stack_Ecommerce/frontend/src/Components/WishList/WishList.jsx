@@ -12,19 +12,6 @@ const Wishlist = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  
-
-  // 如果未登录，重定向到登录页面
-  useEffect(() => {
-    if (!isAuthenticated) {
-      alert('请先登录以查看您的愿望单');
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
-
-  if (!isAuthenticated) {
-    return null; // 防止在重定向前显示内容
-  }
 
   if (loading) {
     return <div className="loading">Loading the wishlist...</div>;

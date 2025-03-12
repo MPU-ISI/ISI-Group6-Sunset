@@ -242,7 +242,7 @@ const WishlistContextProvider = (props) => {
       if (addedToCart) {
         // 然后从愿望单移除
         await removeFromWishlist(item.id);
-        
+
         return true;
       } else {
         throw new Error('添加到购物车失败');
