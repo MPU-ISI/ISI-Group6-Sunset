@@ -21,6 +21,26 @@ const WishlistContextProvider = (props) => {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // 添加弹窗状态
+    const [notification, setNotification] = useState({
+      show: false,
+      message: '',
+      type: 'success' // 可以是 'success', 'error', 'info' 等
+    });
+  
+    // 显示通知弹窗
+    const showNotification = (message, type = 'success') => {
+      setNotification({
+        show: true,
+        message,
+        type
+      });
+      // 2秒后自动关闭通知
+      setTimeout(() => {
+        setNotification(prev => ({ ...prev, show: false }));
+      }, 2000);
+    };
+
   // 检查是否已认证
   const isAuthenticated = () => {
     return localStorage.getItem('auth-token') ? true : false;
@@ -124,7 +144,6 @@ const WishlistContextProvider = (props) => {
     try {
       setError(null);
       
-      // 检查是否已认证
       if (!isAuthenticated()) {
         alert('请先登录');
         return false;
@@ -147,6 +166,7 @@ const WishlistContextProvider = (props) => {
       if (data.success) {
         // 更新本地状态以移除项目
         setWishlistItems(wishlistItems.filter(item => item.id !== Number(itemId)));
+        showNotification(`Remove successfully`);
         return true;
       } else {
         throw new Error(data.errors || 'Failed to remove from wishlist');
@@ -186,6 +206,7 @@ const WishlistContextProvider = (props) => {
       
       if (data.success) {
         setWishlistItems([]);
+        showNotification(`Clear successfully!`);
         return true;
       } else {
         throw new Error(data.errors || 'Failed to clear wishlist');
@@ -221,6 +242,7 @@ const WishlistContextProvider = (props) => {
       if (addedToCart) {
         // 然后从愿望单移除
         await removeFromWishlist(item.id);
+        
         return true;
       } else {
         throw new Error('添加到购物车失败');

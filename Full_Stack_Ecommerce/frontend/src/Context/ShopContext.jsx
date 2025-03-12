@@ -146,6 +146,7 @@ const ShopContextProvider = (props) => {
       if (data.success) {
         setCartItems(data.cart.items || []);
         setCartTotal(data.cart.total || 0);
+        await fetchCart();
         return true;
       } else {
         console.error("Failed to remove from cart:", data.message);
@@ -181,6 +182,7 @@ const ShopContextProvider = (props) => {
       if (data.success) {
         setCartItems(data.cart.items || []);
         setCartTotal(data.cart.total || 0);
+        await fetchCart();
         return true;
       } else {
         console.error("Failed to update cart:", data.message);
@@ -214,6 +216,7 @@ const ShopContextProvider = (props) => {
       if (data.success) {
         setCartItems([]);
         setCartTotal(0);
+        await fetchCart();
         return true;
       } else {
         console.error("Failed to clear cart:", data.message);

@@ -7,10 +7,12 @@ import cart_icon from '../Assets/cart_icon.png'
 import wishlist_icon from '../Assets/wishlist_icon.jpg'
 import { ShopContext } from '../../Context/ShopContext'
 import nav_dropdown from '../Assets/nav_dropdown.png'
+import { WishlistContext } from '../../Context/WishlistContext'
 
 const Navbar = () => {
   let [menu, setMenu] = useState("shop");
   const { cartItems } = useContext(ShopContext);
+  const { wishtlistItems } = useContext(WishlistContext);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -30,6 +32,10 @@ const Navbar = () => {
   // 获取购物车商品总数
   const getCartItemCount = () => {
     return cartItems && Array.isArray(cartItems) ? cartItems.length : 0;
+  }
+
+  const getWishlistCount = () => {
+    return wishtlistItems && Array.isArray(wishtlistItems) ? wishtlistItems.length : 0;
   }
 
   return (
@@ -53,6 +59,7 @@ const Navbar = () => {
             <Link to="/cart"><img src={cart_icon} alt="cart" /></Link>
             <div className="nav-cart-count">{getCartItemCount()}</div>
             <Link to="/wishList"><img src={wishlist_icon} alt="wishList" /></Link>
+            <div className="nav-wishlist-count">{getWishlistCount()}</div>
           </>
         ) : (
           <>

@@ -80,6 +80,20 @@
     background: red;
     color: white;
 }
+
+.nav-wishlist-count{
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -30px;
+    margin-left: -40px;
+    font-size: 14px;
+    background: red;
+    color: white;
+}
 .nav-dropdown{
     display: none;
 }

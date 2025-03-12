@@ -12,6 +12,8 @@ const Wishlist = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  
+
   // 如果未登录，重定向到登录页面
   useEffect(() => {
     if (!isAuthenticated) {
@@ -25,28 +27,31 @@ const Wishlist = () => {
   }
 
   if (loading) {
-    return <div className="loading">正在加载愿望单...</div>;
+    return <div className="loading">Loading the wishlist...</div>;
   }
 
   if (error) {
-    return <div className="error">加载愿望单时出错: {error}</div>;
+    return <div className="error">Error when loading the wishlist: {error}</div>;
   }
 
   // 处理添加到购物车
   const handleAddToCart = async (item) => {
-    await addToCartFromWishlist(item, shopContext);
+    if (window.confirm('Are you sure to add this good to cart?')) {
+      await addToCartFromWishlist(item, shopContext);
+    }
   };
 
   // 移除项目
   const handleRemove = async (itemId) => {
-    if (window.confirm('确定要从愿望单中移除此商品吗？')) {
+    if (window.confirm('Are you sure to remove this from wishlist?')) {
       await removeFromWishlist(itemId);
     }
   };
 
+
   // 清空愿望单
   const handleClearWishlist = async () => {
-    if (window.confirm('确定要清空愿望单吗？此操作无法撤销。')) {
+    if (window.confirm('Are you sure to clear the wishlist?')) {
       await clearWishlist();
     }
   };
@@ -121,9 +126,11 @@ const Wishlist = () => {
             >
               清空愿望单
             </button>
+            <button>
             <Link to="/" className="btn-continue-shopping">
               继续购物
             </Link>
+            </button>
           </div>
         </>
       )}
