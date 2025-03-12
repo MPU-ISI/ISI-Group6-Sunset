@@ -7,7 +7,7 @@ import { WishlistContext } from '../../Context/WishlistContext';
 import { backend_url, currency } from "../../App";
 
 const ProductDisplay = ({ product }) => {
-  const { addToCart, loading } = useContext(ShopContext);
+  const { addToCart, loading, fetchCart } = useContext(ShopContext);
   const { addToWishlist, wishlistLoading } = useContext(WishlistContext);
   
   const [selectedOptions, setSelectedOptions] = useState({});

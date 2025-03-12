@@ -124,7 +124,6 @@ const WishlistContextProvider = (props) => {
       const data = await response.json();
       
       if (data.success) {
-        // 重新获取愿望单以获取最新数据
         await fetchWishlist();
         return true;
       } else {

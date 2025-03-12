@@ -66,12 +66,16 @@ router.post('/add', fetchuser, async (req, res) => {
       });
     }
 
-    // 检查是否已存在相同产品和SKU的购物车项
-    let cartItem = await CartItem.findOne({ 
-      userID, 
-      productID,
-      sku_id: sku_id || { $exists: false }
-    });
+    let cartItemQuery = {userID, productID};
+
+    if (sku_id) {
+      cartItemQuery.sku_id = sku_id;
+    } else {
+      cartItemQuery.sku_id = { $exists: false};
+    }
+
+    let cartItem = await CartItem.findOne(cartItemQuery);
+
 
     if (cartItem) {
       // 更新已有的购物车项

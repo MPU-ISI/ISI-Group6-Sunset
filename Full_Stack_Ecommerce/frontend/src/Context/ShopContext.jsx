@@ -89,7 +89,7 @@ const ShopContextProvider = (props) => {
   }, []);
 
   // 添加商品到购物车
-  const addToCart = async (productId, quantity = 1, sku_id = null) => {
+  const addToCart = async (productID, quantity = 1, sku_id = null) => {
     try {
       const token = localStorage.getItem('auth-token');
       console.log(1);
@@ -105,14 +105,23 @@ const ShopContextProvider = (props) => {
           'Content-Type': 'application/json',
           'auth-token': token
         },
-        body: JSON.stringify({ productId, quantity, sku_id })
+        body: JSON.stringify({ 
+          productID: Number(productID), 
+          quantity: Number(quantity), 
+          sku_id: sku_id ? Number(sku_id): null 
+        })
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       
       const data = await response.json();
       
       if (data.success) {
         setCartItems(data.cart.items || []);
         setCartTotal(data.cart.total || 0);
+        await fetchCart();
         return true;
       } else {
         console.error("Failed to add to cart:", data.message);

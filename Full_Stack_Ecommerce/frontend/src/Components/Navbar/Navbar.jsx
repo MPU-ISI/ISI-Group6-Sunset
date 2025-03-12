@@ -11,7 +11,7 @@ import { WishlistContext } from '../../Context/WishlistContext'
 
 const Navbar = () => {
   let [menu, setMenu] = useState("shop");
-  const { cartItems } = useContext(ShopContext);
+  const { cartItems, fetchCart } = useContext(ShopContext);
   const { wishtlistItems } = useContext(WishlistContext);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
