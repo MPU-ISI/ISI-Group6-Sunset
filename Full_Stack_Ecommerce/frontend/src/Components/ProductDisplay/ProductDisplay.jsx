@@ -102,7 +102,7 @@ const ProductDisplay = ({ product }) => {
       if (product.isConfigurable) {
         if (selectedSku) {
           // 添加具有特定SKU的产品
-          result = await addToCart(product.id || product.productID, quantity, selectedSku.sku_id);
+          result = await addToCart(product.productID, quantity, selectedSku.sku_id);
         } else {
           setAddStatus({ 
             message: "Please select all options", 
@@ -114,7 +114,7 @@ const ProductDisplay = ({ product }) => {
         // 添加简单产品
         console.log(product.id);
         console.log(product.productID);
-        result = await addToCart(product.id || product.productID, quantity);
+        result = await addToCart(product.productID, quantity);
       }
       
       // 处理响应

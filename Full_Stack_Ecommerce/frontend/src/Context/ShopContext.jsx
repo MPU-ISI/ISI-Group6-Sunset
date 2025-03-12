@@ -89,7 +89,7 @@ const ShopContextProvider = (props) => {
   }, []);
 
   // 添加商品到购物车
-  const addToCart = async (productID, quantity = 1, sku_id = null) => {
+  const addToCart = async (productId, quantity = 1, sku_id = null) => {
     try {
       const token = localStorage.getItem('auth-token');
       console.log(1);
@@ -105,7 +105,7 @@ const ShopContextProvider = (props) => {
           'Content-Type': 'application/json',
           'auth-token': token
         },
-        body: JSON.stringify({ productID, quantity, sku_id })
+        body: JSON.stringify({ productId, quantity, sku_id })
       });
       
       const data = await response.json();

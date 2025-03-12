@@ -24,9 +24,10 @@ router.get("/all", async (req, res) => {
 });
 
 // Get product with all related data
+// 修改你的产品详情API路由
 router.get("/detail/:id", async (req, res) => {
   try {
-    // 尝试使用productID查找，如果找不到则使用id
+    // 获取产品基本信息
     let product = await Product.findOne({ productID: parseInt(req.params.id) })
       .populate('attributes')
       .populate('options')
@@ -44,6 +45,33 @@ router.get("/detail/:id", async (req, res) => {
       return res.status(404).json({ success: false, errors: "Product not found" });
     }
     
+    // 产品存在，现在获取每个选项的值
+    if (product.options && product.options.length > 0) {
+      // 将产品转换为JSON以便于操作
+      const productObj = product.toObject();
+      
+      // 创建一个promises数组来并行处理所有选项的值获取
+      const optionPromises = productObj.options.map(async (option) => {
+        // 查找该选项的所有值
+        const optionValues = await mongoose.model('OptionValues').find({ 
+          option_id: option.option_id 
+        });
+        
+        // 将值数组添加到选项对象
+        return {
+          ...option,
+          values: optionValues.map(val => val.value_name)
+        };
+      });
+      
+      // 等待所有选项值获取完成
+      productObj.options = await Promise.all(optionPromises);
+      
+      // 返回含有完整选项和值的产品
+      return res.json(productObj);
+    }
+    
+    // 如果没有选项，直接返回产品
     res.json(product);
   } catch (error) {
     console.error(error);

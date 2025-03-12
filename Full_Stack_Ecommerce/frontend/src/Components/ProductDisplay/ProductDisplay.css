@@ -93,12 +93,15 @@
     gap: 15px;
 }
 
-.productdisplay-right-option-values div {
+.productdisplay-right-option-values .option-value {
     padding: 16px 20px;
     background: #fbfbfb;
     border: 1px solid #ebebeb;
     border-radius: 3px;
     cursor: pointer;
+    min-width: 30px; /* 确保即使内容为空也有一定宽度 */
+    text-align: center; /* 文本居中 */
+    display: inline-block; /* 确保正确显示 */
 }
 
 .productdisplay-right-option-values div.selected {
