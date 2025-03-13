@@ -125,11 +125,9 @@ const ListProduct = () => {
           <div key={index}>
             <div className="listproduct-format-main listproduct-format">
               <p className="product-id">{product.productID || product.id}</p>
-              <img 
-                className="listproduct-product-icon" 
-                src={product.image.startsWith('http') ? product.image : backend_url + product.image} 
-                alt="" 
-              />
+              <a href={`http://localhost:3001/product/${product.id}`}>
+                <img className="listproduct-product-icon" src={`${backend_url}${product.image}`} alt={product.name} />
+              </a>
               <p className="cartitems-product-title">{product.name}</p>
               <p>{currency}{product.old_price}</p>
               <p>{currency}{product.new_price}</p>
