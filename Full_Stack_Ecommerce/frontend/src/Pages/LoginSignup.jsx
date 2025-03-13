@@ -3,19 +3,33 @@ import "./CSS/LoginSignup.css";
 
 const LoginSignup = () => {
   const [state, setState] = useState("Login");
-  
+
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     firstName: "",
     lastName: "",
     address: "",
-    loginIdentifier: "" // 新增用于登录的统一字段
+    loginIdentifier: ""
   });
+
+  const [passwordError, setPasswordError] = useState("");
 
   const changeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === "password" || e.target.name === "confirmPassword") {
+      if (e.target.name === "password") {
+        setPasswordError(formData.confirmPassword && e.target.value !== formData.confirmPassword
+          ? "两次输入的密码不一致"
+          : "");
+      } else {
+        setPasswordError(e.target.value !== formData.password
+          ? "两次输入的密码不一致"
+          : "");
+      }
+    }
   };
 
   const resetForm = () => {
@@ -23,14 +37,15 @@ const LoginSignup = () => {
       userName: "",
       email: "",
       password: "",
+      confirmPassword: "",
       firstName: "",
       lastName: "",
       address: "",
       loginIdentifier: ""
     });
+    setPasswordError("");
   };
 
-  // 修改状态切换函数
   const switchMode = (newState) => {
     setState(newState);
     resetForm();
@@ -38,7 +53,6 @@ const LoginSignup = () => {
 
   const login = async () => {
     try {
-      // 验证输入
       if (!formData.loginIdentifier || !formData.password) {
         alert("请输入用户名/电子邮箱和密码");
         return;
@@ -47,16 +61,15 @@ const LoginSignup = () => {
       const loginData = {
         password: formData.password
       };
-      
-      // 根据输入判断是邮箱还是用户名
+
       if (formData.loginIdentifier.includes('@')) {
         loginData.email = formData.loginIdentifier;
       } else {
         loginData.userName = formData.loginIdentifier;
       }
-      
-      console.log("登录数据:", loginData); // 调试用
-      
+
+      console.log("登录数据:", loginData);
+
       const response = await fetch('http://localhost:4000/api/auth/login', {
         method: 'POST',
         headers: {
@@ -67,11 +80,10 @@ const LoginSignup = () => {
       });
 
       const dataObj = await response.json();
-      console.log("登录响应:", dataObj); // 调试用
-      
+      console.log("登录响应:", dataObj);
+
       if (dataObj.success) {
         localStorage.setItem('auth-token', dataObj.token);
-        // 存储用户信息
         if (dataObj.user) {
           localStorage.setItem('user-info', JSON.stringify(dataObj.user));
         }
@@ -87,14 +99,18 @@ const LoginSignup = () => {
 
   const signup = async () => {
     try {
-      // 验证必填字段
-      if (!formData.userName || !formData.email || !formData.password) {
-        alert("用户名、电子邮箱和密码为必填项");
+      if (!formData.userName || !formData.email || !formData.password || !formData.confirmPassword) {
+        alert("用户名、电子邮箱、密码和确认密码为必填项");
         return;
       }
-      
-      console.log("注册数据:", formData); // 调试用
-      
+
+      if (formData.password !== formData.confirmPassword) {
+        setPasswordError("两次输入的密码不一致");
+        return;
+      }
+
+      console.log("注册数据:", formData);
+
       const response = await fetch('http://localhost:4000/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -112,11 +128,10 @@ const LoginSignup = () => {
       });
 
       const dataObj = await response.json();
-      console.log("注册响应:", dataObj); // 调试用
-      
+      console.log("注册响应:", dataObj);
+
       if (dataObj.success) {
         localStorage.setItem('auth-token', dataObj.token);
-        // 存储用户信息
         if (dataObj.user) {
           localStorage.setItem('user-info', JSON.stringify(dataObj.user));
         }
@@ -137,64 +152,82 @@ const LoginSignup = () => {
         <div className="loginsignup-fields">
           {state === "Sign Up" ? (
             <>
-              <input 
-                type="text" 
-                placeholder="用户名" 
-                name="userName" 
-                value={formData.userName} 
-                onChange={changeHandler} 
-                required
-              />
-              <input 
-                type="text" 
-                placeholder="名字" 
-                name="firstName" 
-                value={formData.firstName} 
-                onChange={changeHandler}
-              />
-              <input 
-                type="text" 
-                placeholder="姓氏" 
-                name="lastName" 
-                value={formData.lastName} 
-                onChange={changeHandler}
-              />
-              <input 
-                type="email" 
-                placeholder="电子邮箱" 
-                name="email" 
-                value={formData.email} 
+              <input
+                type="text"
+                placeholder="用户名"
+                name="userName"
+                value={formData.userName}
                 onChange={changeHandler}
                 required
               />
+              <input
+                type="text"
+                placeholder="名字"
+                name="firstName"
+                value={formData.firstName}
+                onChange={changeHandler}
+              />
+              <input
+                type="text"
+                placeholder="姓氏"
+                name="lastName"
+                value={formData.lastName}
+                onChange={changeHandler}
+              />
+              <input
+                type="email"
+                placeholder="电子邮箱"
+                name="email"
+                value={formData.email}
+                onChange={changeHandler}
+                required
+              />
+              <input
+                type="password"
+                placeholder="密码"
+                name="password"
+                value={formData.password}
+                onChange={changeHandler}
+                required
+              />
+              <input
+                type="password"
+                placeholder="确认密码"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={changeHandler}
+                required
+              />
+              {passwordError && <div className="password-error">{passwordError}</div>}
             </>
           ) : (
-            // 使用单一字段处理登录
-            <input 
-              type="text" 
-              placeholder="用户名或电子邮箱" 
-              name="loginIdentifier" 
-              value={formData.loginIdentifier} 
+            <input
+              type="text"
+              placeholder="用户名或电子邮箱"
+              name="loginIdentifier"
+              value={formData.loginIdentifier}
               onChange={changeHandler}
               required
             />
           )}
-          
-          <input 
-            type="password" 
-            placeholder="密码" 
-            name="password" 
-            value={formData.password} 
-            onChange={changeHandler}
-            required
-          />
-          
+
+          {state === "Login" && (
+            <input
+              type="password"
+              placeholder="密码"
+              name="password"
+              value={formData.password}
+              onChange={changeHandler}
+              required
+            />
+          )}
+
           {state === "Sign Up" && (
-            <input 
-              type="text" 
-              placeholder="地址" 
-              name="address" 
-              value={formData.address} 
+            <input
+              type="text"
+              placeholder="地址"
+              name="address"
+              value={formData.address}
               onChange={changeHandler}
             />
           )}
