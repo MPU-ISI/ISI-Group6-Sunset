@@ -1,22 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react'
-import Breadcrums from '../Components/Breadcrums/Breadcrums'
-import ProductDisplay from '../Components/ProductDisplay/ProductDisplay'
-import DescriptionBox from '../Components/DescriptionBox/DescriptionBox'
-import RelatedProducts from '../Components/RelatedProducts/RelatedProducts'
 import { useParams } from 'react-router-dom'
-import { ShopContext } from '../Context/ShopContext'
 import { backend_url } from '../App'
+import Breadcrums from '../Components/Breadcrums/Breadcrums'
+import DescriptionBox from '../Components/DescriptionBox/DescriptionBox'
+import ProductDisplay from '../Components/ProductDisplay/ProductDisplay'
+import { ShopContext } from '../Context/ShopContext'
 
 const Product = () => {
-  const {products} = useContext(ShopContext);
-  const {productId} = useParams();
+  const { products } = useContext(ShopContext);
+  const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // 首先尝试从上下文中获取基本产品信息
     const basicProduct = products.find((e) => e.id === Number(productId));
-    
+
     // 然后从API获取详细信息，包括属性、选项和SKUs
     fetch(`${backend_url}/api/products/detail/${productId}`)
       .then(res => res.json())
@@ -40,10 +39,9 @@ const Product = () => {
 
   return product ? (
     <div>
-      <Breadcrums product={product}/>
-      <ProductDisplay product={product}/>
-      <DescriptionBox description={product.description}/>
-      <RelatedProducts id={product.id} category={product.category}/>
+      <Breadcrums product={product} />
+      <ProductDisplay product={product} />
+      <DescriptionBox description={product.description} />
     </div>
   ) : <div>Product not found</div>;
 }
