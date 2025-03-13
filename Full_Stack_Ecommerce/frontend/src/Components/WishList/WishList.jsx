@@ -12,7 +12,6 @@ const Wishlist = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-
   if (loading) {
     return <div className="loading">Loading the wishlist...</div>;
   }
@@ -22,9 +21,11 @@ const Wishlist = () => {
   }
 
   // 处理添加到购物车
+  // 注意：由于后端接口期望字段为 productID，因此这里构造一个新的对象来明确定义 productID 来源
   const handleAddToCart = async (item) => {
     if (window.confirm('Are you sure to add this good to cart?')) {
-      await addToCartFromWishlist(item, shopContext);
+      const cartItem = { ...item, productID: item.productId }; // 传递正确的产品ID
+      await addToCartFromWishlist(cartItem, shopContext);
     }
   };
 
@@ -34,7 +35,6 @@ const Wishlist = () => {
       await removeFromWishlist(itemId);
     }
   };
-
 
   // 清空愿望单
   const handleClearWishlist = async () => {
@@ -71,12 +71,16 @@ const Wishlist = () => {
                   alt={item.name}
                 />
                 <div className="wishlist-product-info">
-                  <span className="wishlist-product-name">{item.name}</span>
-                  {item.sku_id && (
+                  {/* 使用 productId 而非 id 以确保跳转至正确的商品页面 */}
+                  <Link to={`/product/${item.productId}`} className="wishlist-product-name">
+                    {item.name}
+                  </Link>
+                  {/* 如果不希望展示变体信息，可直接删除下列代码 */}
+                  {/* {item.sku_id && (
                     <span className="wishlist-product-variant">
                       变体: {item.sku_id}
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
               <div className="wishlist-price">
@@ -114,9 +118,9 @@ const Wishlist = () => {
               清空愿望单
             </button>
             <button>
-            <Link to="/" className="btn-continue-shopping">
-              继续购物
-            </Link>
+              <Link to="/" className="btn-continue-shopping">
+                继续购物
+              </Link>
             </button>
           </div>
         </>
