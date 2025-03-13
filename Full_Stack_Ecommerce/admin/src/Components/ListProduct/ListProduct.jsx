@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./ListProduct.css";
-import cross_icon from '../Assets/cross_icon.png'
+import cross_icon from '../Assets/cross_icon.png';
 import { backend_url, currency } from "../../App";
+import EditProductModal from "../EditProductModal/EditProductModal";
 
 const ListProduct = () => {
   const [allproducts, setAllProducts] = useState([]);
@@ -9,11 +10,12 @@ const ListProduct = () => {
   const [productDetails, setProductDetails] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [loading, setLoading] = useState(false);
+  // 新增编辑弹窗状态
+  const [editProduct, setEditProduct] = useState(null);
 
   const fetchInfo = async () => {
     setLoading(true);
     try {
-      // 使用admin专属路由获取所有产品
       const res = await fetch(`${backend_url}/api/products/adminAll`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -26,7 +28,7 @@ const ListProduct = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchInfo();
@@ -36,22 +38,19 @@ const ListProduct = () => {
     if (!window.confirm("Are you sure you want to remove this product?")) {
       return;
     }
-    
     setLoading(true);
     try {
       const response = await fetch(`${backend_url}/api/products/remove`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+        method: "POST",
+        headers: { 
+          Accept: "application/json", 
+          "Content-Type": "application/json" 
         },
-        body: JSON.stringify({ id: id }),
+        body: JSON.stringify({ id: id })
       });
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
       const result = await response.json();
       if (result.success) {
         await fetchInfo();
@@ -64,12 +63,11 @@ const ListProduct = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const fetchProductDetails = async (id) => {
     setLoading(true);
     try {
-      // 使用admin专属路由获取产品详情
       const response = await fetch(`${backend_url}/api/products/adminDetail/${id}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -83,24 +81,23 @@ const ListProduct = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const viewProductDetails = async (product) => {
     setSelectedProduct(product);
-    // 使用productID或id
     await fetchProductDetails(product.productID || product.id);
-  }
+  };
 
   const closeDetails = () => {
     setShowDetails(false);
     setSelectedProduct(null);
     setProductDetails(null);
-  }
+  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  }
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString();
+  };
 
   return (
     <div className="listproduct">
@@ -127,7 +124,11 @@ const ListProduct = () => {
               <p className="product-id">{product.productID || product.id}</p>
               <img 
                 className="listproduct-product-icon" 
-                src={product.image.startsWith('http') ? product.image : backend_url + product.image} 
+                src={
+                  product.image.startsWith("http") 
+                    ? product.image 
+                    : backend_url + product.image
+                } 
                 alt="" 
               />
               <p className="cartitems-product-title">{product.name}</p>
@@ -143,9 +144,15 @@ const ListProduct = () => {
                 >
                   Details
                 </button>
+                <button 
+                  className="view-details-btn"
+                  onClick={() => setEditProduct(product)}
+                >
+                  Edit
+                </button>
                 <img 
                   className="listproduct-remove-icon" 
-                  onClick={() => { removeProduct(product.productID || product.id) }} 
+                  onClick={() => removeProduct(product.productID || product.id)} 
                   src={cross_icon} 
                   alt="Remove" 
                 />
@@ -156,7 +163,6 @@ const ListProduct = () => {
         ))}
       </div>
 
-      {/* 产品详情模态框 - 增强版 */}
       {showDetails && selectedProduct && productDetails && (
         <div className="product-details-modal">
           <div className="modal-content">
@@ -168,9 +174,11 @@ const ListProduct = () => {
                 <div className="main-image">
                   <h4>Main Image</h4>
                   <img 
-                    src={productDetails.image.startsWith('http') ? 
-                      productDetails.image : 
-                      backend_url + productDetails.image} 
+                    src={
+                      productDetails.image.startsWith("http")
+                        ? productDetails.image 
+                        : backend_url + productDetails.image
+                    } 
                     alt={productDetails.name} 
                   />
                 </div>
@@ -182,8 +190,12 @@ const ListProduct = () => {
                       {productDetails.additional_images.map((img, idx) => (
                         <img 
                           key={idx} 
-                          src={img.startsWith('http') ? img : backend_url + img} 
-                          alt={`${productDetails.name} ${idx+1}`} 
+                          src={
+                            img.startsWith("http")
+                              ? img 
+                              : backend_url + img
+                          } 
+                          alt={`${productDetails.name} ${idx + 1}`} 
                         />
                       ))}
                     </div>
@@ -240,7 +252,6 @@ const ListProduct = () => {
               </div>
             </div>
             
-            {/* 属性部分 */}
             {productDetails.attributes && productDetails.attributes.length > 0 && (
               <div className="product-attributes">
                 <h3>Product Attributes</h3>
@@ -263,7 +274,6 @@ const ListProduct = () => {
               </div>
             )}
             
-            {/* 选项部分 */}
             {productDetails.options && productDetails.options.length > 0 && (
               <div className="product-options">
                 <h3>Product Options</h3>
@@ -279,11 +289,11 @@ const ListProduct = () => {
                       <tr key={index}>
                         <td><strong>{option.option_name}</strong></td>
                         <td>
-                        {option.values && Array.isArray(option.values) 
-                          ? option.values.join(', ') 
-                          : (typeof option.values === 'string' 
-                            ? option.values 
-                            : 'No values available')}
+                          {option.values && Array.isArray(option.values)
+                            ? option.values.join(', ')
+                            : typeof option.values === "string"
+                            ? option.values
+                            : "No values available"}
                         </td>
                       </tr>
                     ))}
@@ -292,7 +302,6 @@ const ListProduct = () => {
               </div>
             )}
             
-            {/* SKU部分 */}
             {productDetails.skus && productDetails.skus.length > 0 && (
               <div className="product-skus">
                 <h3>Product SKUs ({productDetails.skus.length})</h3>
@@ -312,10 +321,11 @@ const ListProduct = () => {
                       <tr key={index}>
                         <td>{sku.sku_code}</td>
                         <td>
-                          {sku.configurable_values && typeof sku.configurable_values === 'object' ? 
-                            Object.entries(sku.configurable_values).map(([key, value]) => (
-                              <div key={key}><strong>{key}:</strong> {value}</div>
-                            )) : 'N/A'}
+                          {sku.configurable_values && typeof sku.configurable_values === 'object'
+                            ? Object.entries(sku.configurable_values).map(([key, value]) => (
+                                <div key={key}><strong>{key}:</strong> {value}</div>
+                              ))
+                            : "N/A"}
                         </td>
                         <td>{currency}{sku.price}</td>
                         <td>{sku.quantity}</td>
@@ -323,9 +333,11 @@ const ListProduct = () => {
                         <td>
                           {sku.image_url && (
                             <img 
-                              src={sku.image_url.startsWith('http') ? 
-                                sku.image_url : 
-                                backend_url + sku.image_url} 
+                              src={
+                                sku.image_url.startsWith("http")
+                                  ? sku.image_url
+                                  : backend_url + sku.image_url
+                              } 
                               alt={sku.sku_code}
                               className="sku-thumbnail" 
                             />
@@ -339,6 +351,17 @@ const ListProduct = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* 编辑弹窗组件 */}
+      {editProduct && (
+        <EditProductModal 
+          product={editProduct} 
+          onClose={() => setEditProduct(null)}
+          onSave={(updatedProduct) => {
+            fetchInfo();
+          }}
+        />
       )}
     </div>
   );
