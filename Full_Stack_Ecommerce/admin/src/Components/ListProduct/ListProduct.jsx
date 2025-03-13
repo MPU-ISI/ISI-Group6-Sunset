@@ -9,6 +9,7 @@ const ListProduct = () => {
   const [productDetails, setProductDetails] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [filterId, setFilterId] = useState('');
 
   const fetchInfo = async () => {
     setLoading(true);
@@ -105,6 +106,14 @@ const ListProduct = () => {
   return (
     <div className="listproduct">
       <h1>All Products List</h1>
+      <div>
+        <input 
+          type="text" 
+          placeholder="Filter by Product ID" 
+          value={filterId}
+          onChange={(e) => setFilterId(e.target.value)} // 更新過濾條件
+        />
+      </div>
       {loading && <div className="loading-indicator">Loading...</div>}
       
       <div className="listproduct-format-main">
@@ -121,7 +130,12 @@ const ListProduct = () => {
       </div>
       <div className="listproduct-allproducts">
         <hr />
-        {allproducts.map((product, index) => (
+        {allproducts
+          .filter(product => 
+            (product.productID && product.productID.toString().includes(filterId)) || 
+            (product.id && product.id.toString().includes(filterId))
+          )
+          .map((product, index) => (
           <div key={index}>
             <div className="listproduct-format-main listproduct-format">
               <p className="product-id">{product.productID || product.id}</p>
