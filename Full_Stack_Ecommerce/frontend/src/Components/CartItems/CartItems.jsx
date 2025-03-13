@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
-import "./CartItems.css";
+import "./CartItems.css";  // 修改为引用 CartItems.css 而非 WishList.css
 import cross_icon from "../Assets/cart_cross_icon.png";
 import { ShopContext } from "../../Context/ShopContext";
 import { backend_url, currency } from "../../App";
+import { Link } from 'react-router-dom';
 
 const CartItems = () => {
   const { cartItems, removeFromCart, cartTotal, loading, updateCartItemQuantity } = useContext(ShopContext);
@@ -44,16 +45,18 @@ const CartItems = () => {
       </div>
       <hr />
       
-      {!cartItems || cartItems.length === 0 ? (
+      {(!cartItems || cartItems.length === 0) ? (
         <div className="cart-empty">
           <p>Your cart is empty</p>
         </div>
       ) : (
         cartItems.map((item) => {
-          // 获取产品和SKU信息
+          // 从 cartItem 里获取产品详情信息
           const product = item.productDetails || {};
           const sku = item.skuDetails;
           const price = sku?.price || product.price || 0;
+          // 尝试从多个源中获取产品ID，确保跳转链接的正确
+          const prodId = product.productId || product.productID || item.productID;
           
           return (
             <div key={item.cartItemID}>
@@ -64,7 +67,9 @@ const CartItems = () => {
                   alt={product.name || "Product"}
                 />
                 <div className="cartitems-product-title">
-                  <p>{product.name || "Product name unavailable"}</p>
+                  <Link to={`/product/${prodId}`} className="cartitems-product-name">
+                    {product.name || "Product name unavailable"}
+                  </Link>
                   {sku && (
                     <span className="cartitems-product-options">
                       {formatOptions(sku.configurable_values)}
