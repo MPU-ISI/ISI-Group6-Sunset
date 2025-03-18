@@ -16,9 +16,9 @@ router.get("/all", async (req, res) => {
   try {
     let products = await Product.find({});
     console.log("All Products");
-    res.send(products);
+    res.json(products);
   } catch (error) {
-    console.error(error);
+    console.error("Error in /all route:", error);
     res.status(500).json({ success: false, errors: "Server error" });
   }
 });
@@ -32,7 +32,7 @@ router.get("/detail/:id", async (req, res) => {
       .populate('attributes')
       .populate('options')
       .populate('skus');
-    
+
     if (!product) {
       // 兼容旧数据，尝试使用id查找
       product = await Product.findOne({ id: parseInt(req.params.id) })
@@ -40,37 +40,37 @@ router.get("/detail/:id", async (req, res) => {
         .populate('options')
         .populate('skus');
     }
-    
+
     if (!product) {
       return res.status(404).json({ success: false, errors: "Product not found" });
     }
-    
+
     // 产品存在，现在获取每个选项的值
     if (product.options && product.options.length > 0) {
       // 将产品转换为JSON以便于操作
       const productObj = product.toObject();
-      
+
       // 创建一个promises数组来并行处理所有选项的值获取
       const optionPromises = productObj.options.map(async (option) => {
         // 查找该选项的所有值
-        const optionValues = await mongoose.model('OptionValues').find({ 
-          option_id: option.option_id 
+        const optionValues = await mongoose.model('OptionValues').find({
+          option_id: option.option_id
         });
-        
+
         // 将值数组添加到选项对象
         return {
           ...option,
           values: optionValues.map(val => val.value_name)
         };
       });
-      
+
       // 等待所有选项值获取完成
       productObj.options = await Promise.all(optionPromises);
-      
+
       // 返回含有完整选项和值的产品
       return res.json(productObj);
     }
-    
+
     // 如果没有选项，直接返回产品
     res.json(product);
   } catch (error) {
@@ -84,9 +84,9 @@ router.get("/newcollections", async (req, res) => {
   try {
     let products = await Product.find({}).sort({ date: -1 }).limit(8);
     console.log("New Collections");
-    res.send(products);
+    res.json(products);
   } catch (error) {
-    console.error(error);
+    console.error("Error in /newcollections route:", error);
     res.status(500).json({ success: false, errors: "Server error" });
   }
 });
@@ -96,9 +96,9 @@ router.get("/popularinwomen", async (req, res) => {
   try {
     let products = await Product.find({ category: "women" }).limit(4);
     console.log("Popular In Women");
-    res.send(products);
+    res.json(products);
   } catch (error) {
-    console.error(error);
+    console.error("Error in /popularinwomen route:", error);
     res.status(500).json({ success: false, errors: "Server error" });
   }
 });
@@ -109,9 +109,9 @@ router.post("/related", async (req, res) => {
     console.log("Related Products");
     const { category } = req.body;
     const products = await Product.find({ category }).limit(4);
-    res.send(products);
+    res.json(products);
   } catch (error) {
-    console.error(error);
+    console.error("Error in /related route:", error);
     res.status(500).json({ success: false, errors: "Server error" });
   }
 });
@@ -122,23 +122,23 @@ router.post("/add", async (req, res) => {
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
-    
+
     try {
       // 1. 生成新的产品ID
-      let products = await Product.find({}).sort({productID: -1}).limit(1).session(session);
+      let products = await Product.find({}).sort({ productID: -1 }).limit(1).session(session);
       let productID;
       if (products.length > 0 && products[0].productID) {
         productID = products[0].productID + 1;
       } else {
         // 检查是否有使用id字段的产品
-        let oldProducts = await Product.find({}).sort({id: -1}).limit(1).session(session);
+        let oldProducts = await Product.find({}).sort({ id: -1 }).limit(1).session(session);
         if (oldProducts.length > 0 && oldProducts[0].id) {
           productID = oldProducts[0].id + 1;
         } else {
           productID = 1;
         }
       }
-      
+
       // 2. 创建基础产品
       const productData = {
         productID: productID, // 使用productID作为主键
@@ -154,17 +154,17 @@ router.post("/add", async (req, res) => {
         productType: req.body.isConfigurable ? 'configurable' : 'simple',
         categoryID: req.body.categoryID
       };
-      
+
       const product = new Product(productData);
       await product.save({ session });
-      
+
       // 3. 保存额外图片到Images表
       if (req.body.additional_images && req.body.additional_images.length > 0) {
         const imagePromises = req.body.additional_images.map(async (url, index) => {
           // 获取最后一个图片ID
-          let lastImage = await Image.findOne({}).sort({imageID: -1}).session(session);
+          let lastImage = await Image.findOne({}).sort({ imageID: -1 }).session(session);
           let nextImageID = lastImage ? lastImage.imageID + 1 : 1;
-          
+
           const image = new Image({
             imageID: nextImageID + index,
             productID: productID,
@@ -173,19 +173,19 @@ router.post("/add", async (req, res) => {
           await image.save({ session });
           return image;
         });
-        
+
         await Promise.all(imagePromises);
       }
-      
+
       // 4. 如果是可配置产品，创建并关联相关模型
       if (req.body.isConfigurable) {
         // 处理属性
         if (req.body.attributes && req.body.attributes.length > 0) {
           const attributesPromises = req.body.attributes.map(async (attr, index) => {
             // 获取最后一个属性ID
-            let lastAttribute = await ProductAttribute.findOne({}).sort({attributeID: -1}).session(session);
+            let lastAttribute = await ProductAttribute.findOne({}).sort({ attributeID: -1 }).session(session);
             let nextAttributeID = lastAttribute ? lastAttribute.attributeID + 1 : 1;
-            
+
             const attribute = new ProductAttribute({
               attributeID: nextAttributeID + index,
               productID: productID,
@@ -195,20 +195,20 @@ router.post("/add", async (req, res) => {
             await attribute.save({ session });
             return attribute._id;
           });
-          
+
           const attributeIds = await Promise.all(attributesPromises);
           product.attributes = attributeIds;
         }
-        
+
         if (req.body.options && req.body.options.length > 0) {
           const optionsPromises = req.body.options.map(async (opt, index) => {
             // 获取最后一个选项ID
-            let lastOption = await ProductOption.findOne({}).sort({option_id: -1}).session(session);
+            let lastOption = await ProductOption.findOne({}).sort({ option_id: -1 }).session(session);
             let nextOptionID = lastOption ? lastOption.option_id + 1 : 1;
-            
+
             // 计算选项ID
             const optionId = nextOptionID + index;
-            
+
             // 保存选项
             const option = new ProductOption({
               option_id: optionId,
@@ -216,25 +216,25 @@ router.post("/add", async (req, res) => {
               option_name: opt.option_name
             });
             await option.save({ session });
-            
+
             // 保存选项值
             if (opt.values && opt.values.length > 0) {
               console.log(`Processing ${opt.values.length} values for option ${opt.option_name}`);
-              
+
               // 获取当前最大值ID (仅作为建议值，不保证唯一)
               let maxValueId = 0;
               try {
                 const highestValue = await OptionValues.findOne({})
-                  .sort({value_id: -1})
+                  .sort({ value_id: -1 })
                   .session(session);
-                
-                maxValueId = highestValue && highestValue.value_id 
-                  ? highestValue.value_id 
+
+                maxValueId = highestValue && highestValue.value_id
+                  ? highestValue.value_id
                   : 0;
               } catch (err) {
                 console.warn("Could not determine max value_id:", err);
               }
-              
+
               // 为每个值创建记录
               const valuePromises = opt.values.map(async (valueName, index) => {
                 try {
@@ -243,60 +243,60 @@ router.post("/add", async (req, res) => {
                     option_id: optionId,
                     value_name: valueName
                   }).session(session);
-                  
+
                   // 如果已存在则跳过
                   if (existingValue) {
                     console.log(`Value "${valueName}" already exists for option ${optionId}, skipping`);
                     return existingValue;
                   }
-                  
+
                   // 创建新值
                   const optionValue = new OptionValues({
                     value_id: maxValueId + index + 1, // 仅作为建议值
                     option_id: optionId,
                     value_name: valueName
                   });
-                  
+
                   return await optionValue.save({ session });
                 } catch (err) {
                   // 如果是唯一键冲突，尝试使用不同的处理方式
                   if (err.code === 11000) {
                     console.warn(`Conflict saving value "${valueName}". Creating without value_id.`);
-                    
+
                     // 尝试不指定value_id
                     const fallbackValue = new OptionValues({
                       option_id: optionId,
                       value_name: valueName
                     });
-                    
+
                     return await fallbackValue.save({ session });
                   }
                   throw err;
                 }
               });
-              
+
               // 等待所有值保存完成
               await Promise.all(valuePromises);
               console.log(`Successfully saved all values for option ${opt.option_name}`);
             }
-                        
+
             return option._id;
           });
-          
+
           const optionIds = await Promise.all(optionsPromises);
           product.options = optionIds;
         }
-        
+
         // 处理SKUs
         if (req.body.skus && req.body.skus.length > 0) {
           const skusPromises = req.body.skus.map(async (skuItem, index) => {
             // 获取最后一个SKU ID
-            let lastSKU = await SKU.findOne({}).sort({sku_id: -1}).session(session);
+            let lastSKU = await SKU.findOne({}).sort({ sku_id: -1 }).session(session);
             let nextSkuID = lastSKU ? lastSKU.sku_id + 1 : 1;
-            
+
             // 将configurable_values对象转换为JSON字符串
             const configValues = JSON.stringify(skuItem.configurable_values);
-            
+
             const sku = new SKU({
               sku_id: nextSkuID + index,
               product_id: productID,
@@ -310,19 +310,19 @@ router.post("/add", async (req, res) => {
             await sku.save({ session });
             return sku._id;
           });
-          
+
           const skuIds = await Promise.all(skusPromises);
           product.skus = skuIds;
         }
-        
+
         // 更新产品以保存关联
         await product.save({ session });
       }
-      
+
       await session.commitTransaction();
       console.log("Product Added", productID);
       res.json({ success: true, name: req.body.name, id: productID });
-      
+
     } catch (error) {
       await session.abortTransaction();
       console.error("Transaction error:", error);
@@ -341,42 +341,42 @@ router.post("/remove", async (req, res) => {
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
-    
+
     try {
       // 尝试使用productID或id查找产品
       const productId = parseInt(req.body.id);
-      let product = await Product.findOne({ 
-        $or: [{ productID: productId }, { id: productId }] 
+      let product = await Product.findOne({
+        $or: [{ productID: productId }, { id: productId }]
       }).session(session);
-      
+
       if (!product) {
         return res.status(404).json({ success: false, errors: "Product not found" });
       }
-      
+
       // 获取产品ID (使用productID或后备为id)
       const productID = product.productID || product.id;
-      
+
       // 删除关联的图片
       await Image.deleteMany({ productID: productID }).session(session);
-      
+
       // 删除关联的属性
       await ProductAttribute.deleteMany({ productID: productID }).session(session);
-      
+
       // 删除关联的选项和值
       await ProductOption.deleteMany({ product_id: productID }).session(session);
-      
+
       // 删除关联的SKUs
       await SKU.deleteMany({ product_id: productID }).session(session);
-      
+
       // 删除产品本身
-      await Product.deleteOne({ 
-        $or: [{ productID: productId }, { id: productId }] 
+      await Product.deleteOne({
+        $or: [{ productID: productId }, { id: productId }]
       }).session(session);
-      
+
       await session.commitTransaction();
       console.log("Product Removed", productID);
       res.json({ success: true, name: req.body.name });
-      
+
     } catch (error) {
       await session.abortTransaction();
       console.error("Transaction error:", error);
@@ -400,21 +400,21 @@ router.get("/adminAll", async (req, res) => {
     let products = await Product.find({})
       .sort({ productID: -1 }) // 按ID倒序排列，新产品在前
       .lean(); // 使用lean()转换为纯JavaScript对象，提高性能
-    
+
     // 对每个产品获取其附加图片
     const productsWithImages = await Promise.all(products.map(async (product) => {
       // 获取产品的附加图片
-      const images = await Image.find({ 
-        productID: product.productID || product.id 
+      const images = await Image.find({
+        productID: product.productID || product.id
       }).select('image_url -_id').lean();
-      
+
       // 返回带有附加图片的产品
       return {
         ...product,
         additional_images: images.map(img => img.image_url)
       };
     }));
-    
+
     console.log("Admin - All Products with Images");
     res.json(productsWithImages);
   } catch (error) {
@@ -427,7 +427,7 @@ router.get("/adminAll", async (req, res) => {
 router.get("/adminDetail/:id", async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
-    
+
     // 查找产品 - 尝试通过productID或id字段
     const product = await Product.findOne({
       $or: [{ productID: productId }, { id: productId }]
@@ -436,40 +436,40 @@ router.get("/adminDetail/:id", async (req, res) => {
       .populate('options')     // 填充选项
       .populate('skus')        // 填充SKU
       .lean();
-    
+
     if (!product) {
       return res.status(404).json({ success: false, errors: "Product not found" });
     }
-    
+
     // 获取产品图片
     const images = await Image.find({
       productID: product.productID || product.id
     }).select('image_url -_id').lean();
-    
+
     // 获取选项值
     const optionsWithValues = await Promise.all((product.options || []).map(async (option) => {
       // 确保我们有option_id
       const optionId = option.option_id;
-      
+
       if (!optionId) {
         console.warn(`Option missing option_id:`, option);
         return option;
       }
-      
+
       // 查询此选项的所有值
       const optionValues = await OptionValues.find({
         option_id: optionId
       }).sort({ value_id: 1 }).lean();
-      
+
       console.log(`Found ${optionValues.length} values for option ${optionId}`);
-      
+
       // 返回带有值的选项
       return {
         ...option,
         values: optionValues.map(val => val.value_name)
       };
     }));
-    
+
     // 处理SKU的configurable_value_ids字段
     const skusWithValues = (product.skus || []).map(sku => {
       // 如果configurable_value_ids是JSON字符串，转换为对象
@@ -481,13 +481,13 @@ router.get("/adminDetail/:id", async (req, res) => {
       } catch (e) {
         console.error("Error parsing SKU configurable values:", e);
       }
-      
+
       return {
         ...sku,
         configurable_values: configValues
       };
     });
-    
+
     // 构建完整的响应对象
     const detailedProduct = {
       ...product,
@@ -495,12 +495,128 @@ router.get("/adminDetail/:id", async (req, res) => {
       options: optionsWithValues,
       skus: skusWithValues
     };
-    
+
     console.log("Admin - Product Detail", productId);
     res.json(detailedProduct);
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, errors: "Server error" });
+  }
+});
+
+// 更新产品状态（启用/禁用）
+router.put("/:id/status", async (req, res) => {
+  try {
+    const productId = parseInt(req.params.id);
+    const { available } = req.body;
+
+    console.log('Updating product status - Request:', {
+      productId,
+      available,
+      headers: req.headers
+    });
+
+    if (typeof available !== 'boolean') {
+      console.error('Invalid request: available must be a boolean value');
+      return res.status(400).json({
+        success: false,
+        errors: "Invalid request: available must be a boolean value"
+      });
+    }
+
+    // 先尝试通过productID查找
+    let product = await Product.findOne({ productID: productId });
+    console.log('Found by productID:', product);
+
+    // 如果没找到，尝试通过id查找
+    if (!product) {
+      product = await Product.findOne({ id: productId });
+      console.log('Found by id:', product);
+    }
+
+    if (!product) {
+      console.log('Product not found');
+      return res.status(404).json({
+        success: false,
+        errors: "Product not found"
+      });
+    }
+
+    // 更新产品状态
+    product.available = available;
+    await product.save();
+    console.log('Product updated successfully:', product);
+
+    return res.status(200).json({
+      success: true,
+      product: {
+        id: product.productID || product.id,
+        name: product.name,
+        available: product.available
+      }
+    });
+  } catch (error) {
+    console.error('Error in status update:', error);
+    return res.status(500).json({
+      success: false,
+      errors: error.message || "Internal server error"
+    });
+  }
+});
+
+// 更新产品详情
+router.put("/:id", async (req, res) => {
+  try {
+    const productId = parseInt(req.params.id);
+    const updateData = req.body;
+
+    console.log('Updating product - Request:', {
+      productId,
+      updateData,
+      headers: req.headers
+    });
+
+    // 先尝试通过productID查找
+    let product = await Product.findOne({ productID: productId });
+    console.log('Found by productID:', product);
+
+    // 如果没找到，尝试通过id查找
+    if (!product) {
+      product = await Product.findOne({ id: productId });
+      console.log('Found by id:', product);
+    }
+
+    if (!product) {
+      console.log('Product not found');
+      return res.status(404).json({
+        success: false,
+        errors: "产品未找到"
+      });
+    }
+
+    // 更新产品信息
+    Object.assign(product, updateData);
+    await product.save();
+    console.log('Product updated successfully:', product);
+
+    return res.status(200).json({
+      success: true,
+      product: {
+        id: product.productID || product.id,
+        name: product.name,
+        description: product.description,
+        old_price: product.old_price,
+        new_price: product.new_price,
+        category: product.category,
+        available: product.available
+      }
+    });
+  } catch (error) {
+    console.error('Error in product update:', error);
+    return res.status(500).json({
+      success: false,
+      errors: error.message || "服务器内部错误"
+    });
   }
 });
 

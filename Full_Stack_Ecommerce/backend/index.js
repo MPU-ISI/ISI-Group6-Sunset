@@ -20,6 +20,13 @@ mongoose.connection.once('open', () => {
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+// 添加全局响应头中间件
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  next();
+});
+
 app.use('/images', express.static('upload/images'));
 
 // Routes
@@ -31,12 +38,27 @@ app.use("/api/wishlist", require("./routes/wishlist"));
 
 // Root route
 app.get("/", (req, res) => {
-  res.send("API is running");
+  res.json({ message: "API is running" });
+});
+
+// 404处理
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    errors: "Route not found"
+  });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error details:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    headers: req.headers
+  });
+
   res.status(500).json({
     success: false,
     errors: err.message || "Something went wrong!"
