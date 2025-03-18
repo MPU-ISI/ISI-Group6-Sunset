@@ -6,10 +6,7 @@ const connectDB = async () => {
         console.log("DB Connected");
     })
 
-    await mongoose.connect(`${process.env.MONGODB_URI}e-commerce`, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    });
+    await mongoose.connect(`${process.env.MONGODB_URI}/e-commerce`)
 
 }
 
