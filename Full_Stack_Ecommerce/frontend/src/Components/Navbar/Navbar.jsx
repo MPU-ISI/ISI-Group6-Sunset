@@ -60,6 +60,8 @@ const Navbar = () => {
             <div className="nav-cart-count">{getCartItemCount()}</div>
             <Link to="/wishList"><img src={wishlist_icon} alt="wishList" /></Link>
             <div className="nav-wishlist-count">{getWishlistCount()}</div>
+            <Link to="/order"><img src={wishlist_icon} alt="order" /></Link>
+            <div className="nav-wishlist-count">{getWishlistCount()}</div>
           </>
         ) : (
           <>

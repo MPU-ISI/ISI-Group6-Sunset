@@ -1,0 +1,248 @@
+/* OrderDetailModal.css */
+.order-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .order-modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .order-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1;
+  }
+  
+  .order-modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+  }
+  
+  .close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+  }
+  
+  .close-modal-btn:hover {
+    color: #333;
+  }
+  
+  .order-modal-body {
+    padding: 20px;
+    flex: 1;
+  }
+  
+  .order-modal-section {
+    margin-bottom: 25px;
+  }
+  
+  .order-modal-section h3 {
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .order-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  .order-info-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .info-label {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+  }
+  
+  .info-value {
+    font-size: 16px;
+  }
+  
+  .total-value {
+    font-weight: bold;
+    color: #28a745;
+  }
+  
+  .status-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  /* 订单项目表格 */
+  .order-items-table {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .order-items-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    background-color: #f8f9fa;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .order-items-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .order-items-row:last-child {
+    border-bottom: none;
+  }
+  
+  .item-cell {
+    padding: 10px 15px;
+  }
+  
+  .item-name {
+    font-weight: 500;
+  }
+  
+  .item-sku {
+    font-size: 12px;
+    color: #666;
+    margin-top: 3px;
+  }
+  
+  /* 地址、跟踪号和票据信息 */
+  .address-box, .tracking-box, .ticket-box {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+  }
+  
+  /* 状态历史 */
+  .status-history {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .status-history-item {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 15px;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #eee;
+  }
+  
+  .status-history-date {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .status-history-name {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .status-history-comment {
+    font-style: italic;
+    color: #555;
+  }
+  
+  /* 底部按钮 */
+  .order-modal-footer {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #eee;
+    background-color: #f8f9fa;
+    position: sticky;
+    bottom: 0;
+  }
+  
+  .close-order-modal-btn, .cancel-order-modal-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+  }
+  
+  .close-order-modal-btn {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  
+  .close-order-modal-btn:hover {
+    background-color: #dee2e6;
+  }
+  
+  .cancel-order-modal-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .cancel-order-modal-btn:hover {
+    background-color: #c82333;
+  }
+  
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .order-info-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .order-items-header, .order-items-row {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+    
+    .item-cell:nth-child(2) {
+      display: none;
+    }
+    
+    .status-history-item {
+      grid-template-columns: 1fr;
+      gap: 5px;
+    }
+  }

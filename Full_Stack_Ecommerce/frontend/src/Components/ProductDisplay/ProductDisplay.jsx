@@ -154,9 +154,36 @@ const ProductDisplay = ({ product }) => {
   // 获取库存状态
   const getInventoryStatus = () => {
     if (product.isConfigurable && selectedSku) {
+      // 检查SKU的库存数量和状态
+      const skuQuantity = parseInt(selectedSku.quantity) || 0;
+      if (skuQuantity <= 0) {
+        return "out_of_stock"; // 如果数量为0，总是返回缺货状态
+      }
       return selectedSku.inventory_status || "in_stock";
+    } else if (!product.isConfigurable) {
+      // 对于简单产品，检查产品或关联SKU的库存数量
+      const simpleQuantity = 
+        parseInt(product.quantity) || 
+        (product.skus && product.skus[0] ? parseInt(product.skus[0].quantity) || 0 : 0);
+      
+      if (simpleQuantity <= 0) {
+        return "out_of_stock"; // 如果数量为0，总是返回缺货状态
+      }
+      
+      // 使用状态字段，如果存在的话
+      if (product.inventory_status) {
+        return product.inventory_status;
+      } else if (product.skus && product.skus[0] && product.skus[0].inventory_status) {
+        return product.skus[0].inventory_status;
+      }
     }
-    return "in_stock"; // 默认状态
+    
+    // 默认状态 - 基于产品的库存数量
+    const defaultQuantity = 
+      parseInt(product.quantity) || 
+      (product.skus && product.skus[0] ? parseInt(product.skus[0].quantity) || 0 : 0);
+    
+    return defaultQuantity > 0 ? "in_stock" : "out_of_stock";
   };
 
   // 添加到愿望单的处理函数
@@ -297,7 +324,8 @@ const ProductDisplay = ({ product }) => {
               loading || 
               wishlistLoading ||
               (product.isConfigurable && !selectedSku) || 
-              getInventoryStatus() !== "in_stock"
+              getInventoryStatus() !== "in_stock" 
+              
             }
           >
             {loading ? "ADDING..." : "ADD TO CART"}

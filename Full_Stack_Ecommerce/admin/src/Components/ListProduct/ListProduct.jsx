@@ -35,6 +35,33 @@ const ListProduct = () => {
     fetchInfo();
   }, []);
 
+  const getProductQuantity = (product) => {
+    // 如果后端已经计算并添加了quantity字段，直接使用
+    if (typeof product.quantity === 'number') {
+      return product.quantity;
+    }
+    
+    // 如果有SKUs数组，使用适当的方法获取库存
+    if (Array.isArray(product.skus) && product.skus.length > 0) {
+      if (!product.isConfigurable) {
+        // 简单产品 - 使用第一个SKU的库存
+        const firstSku = product.skus[0];
+        return typeof firstSku === 'object' && firstSku !== null 
+          ? (parseInt(firstSku.quantity) || 0)
+          : 0;
+      } else {
+        // 可配置产品 - 计算所有SKU的总库存
+        return product.skus.reduce(
+          (sum, sku) => sum + (parseInt(typeof sku === 'object' ? sku.quantity : 0) || 0),
+          0
+        );
+      }
+    }
+    
+    // 默认返回0而不是N/A
+    return 0;
+  };
+
   const removeProduct = async (id) => {
     if (!window.confirm("Are you sure you want to remove this product?")) {
       return;
@@ -274,6 +301,7 @@ const ListProduct = () => {
         <p>New Price</p>
         <p>Category</p>
         <p>Type</p>
+        <p>Quantity</p>
         <p>Added Date</p>
         <p>Status</p>
         <p>Actions</p>
@@ -297,6 +325,7 @@ const ListProduct = () => {
                 <p>{currency}{product.new_price}</p>
                 <p>{product.category}</p>
                 <p className="hide-on-mobile">{product.isConfigurable ? "Configurable" : "Simple"}</p>
+                <p className="hide-on-mobile">{getProductQuantity(product)}</p>
                 <p className="hide-on-mobile">{formatDate(product.date)}</p>
                 <p>{product.available ? "Active" : "Disabled"}</p>
                 <div className="listproduct-actions">
@@ -476,6 +505,20 @@ const ListProduct = () => {
                           <tr>
                             <td><strong>Added Date:</strong></td>
                             <td>{formatDate(productDetails.date)}</td>
+                          </tr>
+                          <tr>
+                            <td><strong>Quantity:</strong></td>
+                            <td>
+                              {productDetails.isConfigurable 
+                                ? `${productDetails.skus && productDetails.skus.reduce((sum, sku) => sum + (parseInt(sku.quantity) || 0), 0)} (total)`
+                                : (
+                                  typeof productDetails.quantity === 'number' 
+                                    ? productDetails.quantity 
+                                    : (productDetails.skus && productDetails.skus[0] && typeof productDetails.skus[0].quantity === 'number'
+                                      ? productDetails.skus[0].quantity 
+                                      : 0)
+                                )}
+                            </td>
                           </tr>
                         </tbody>
                       </table>

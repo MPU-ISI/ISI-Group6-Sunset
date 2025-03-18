@@ -1,0 +1,315 @@
+/* ListOrder.css */
+.list-order-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .list-order-container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  /* 筛选器样式 */
+  .order-filters {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .filter-row:last-child {
+    margin-bottom: 0;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 150px;
+  }
+  
+  .filter-group label {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .filter-group select,
+  .filter-group input {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .search-group {
+    position: relative;
+    flex: 2;
+  }
+  
+  .search-group input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .clear-search {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+  }
+  
+  .reset-button {
+    align-self: flex-end;
+    background-color: #eeeeee;
+    border: none;
+    color: #333;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .reset-button:hover {
+    background-color: #dddddd;
+  }
+  
+  /* 表格样式 */
+  .orders-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  .orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .orders-table th,
+  .orders-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .orders-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+  
+  .sortable-header {
+    cursor: pointer;
+  }
+  
+  .sortable-header:hover {
+    background-color: #e9e9e9;
+  }
+  
+  .sort-arrow {
+    display: inline-block;
+    margin-left: 5px;
+  }
+  
+  /* 订单项目样式 */
+  .order-items {
+    max-width: 250px;
+  }
+  
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  .item-name {
+    flex: 2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .item-qty {
+    flex: 0.5;
+    text-align: center;
+    color: #777;
+  }
+  
+  .item-price {
+    flex: 1;
+    text-align: right;
+    color: #333;
+  }
+  
+  .more-items {
+    font-style: italic;
+    color: #999;
+    font-size: 13px;
+    margin-top: 5px;
+  }
+  
+  .order-total {
+    font-weight: bold;
+    color: #28a745;
+  }
+  
+  /* 状态徽章 */
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .status-shipped {
+    background-color: #cce5ff;
+    color: #004085;
+  }
+  
+  .status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .status-hold {
+    background-color: #e2e3e5;
+    color: #383d41;
+  }
+  
+  .status-issued {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .status-complete {
+    background-color: #d6d8db;
+    color: #1b1e21;
+  }
+  
+  .status-refunded {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+  
+  /* 操作按钮 */
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .view-button,
+  .edit-button {
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 13px;
+    text-align: center;
+  }
+  
+  .view-button {
+    background-color: #f8f9fa;
+    color: #212529;
+  }
+  
+  .edit-button {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .view-button:hover {
+    background-color: #e2e6ea;
+  }
+  
+  .edit-button:hover {
+    background-color: #0069d9;
+  }
+  
+  /* 分页 */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+  }
+  
+  .pagination button {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  .pagination button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  
+  .pagination button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .pagination-ellipsis {
+    padding: 5px 10px;
+    display: inline-block;
+  }
+  
+  /* 错误和加载状态 */
+  .error-message {
+    padding: 15px;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    color: #721c24;
+    margin-bottom: 20px;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+  }
+  
+  .no-orders {
+    text-align: center;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    color: #666;
+  }
+  
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .filter-row {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .filter-group {
+      width: 100%;
+    }
+    
+    .orders-table th, 
+    .orders-table td {
+      padding: 8px;
+    }
+  }

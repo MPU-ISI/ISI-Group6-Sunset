@@ -177,6 +177,38 @@ router.post("/add", async (req, res) => {
         await Promise.all(imagePromises);
       }
 
+      if (!req.body.isConfigurable) {
+        // 获取最后一个SKU ID
+        let lastSKU = await SKU.findOne({}).sort({ sku_id: -1 }).session(session);
+        let nextSkuID = lastSKU ? lastSKU.sku_id + 1 : 1;
+
+        // 确保库存数量是数字
+        const quantity = parseInt(req.body.quantity) || 0;
+        const inventoryStatus = quantity > 0 ? (req.body.inventory_status || "in_stock") : "out_of_stock";
+        console.log("Creating simple product SKU with quantity:", quantity);
+
+        // 创建简单产品的单一SKU
+        const sku = new SKU({
+          sku_id: nextSkuID,
+          product_id: productID,
+          configurable_value_ids: "{}",  // 空对象，因为简单产品没有配置选项
+          sku_code: `SKU-${productID}`,  // 使用产品ID自动生成SKU代码
+          inventory_status: inventoryStatus,
+          quantity: quantity,  // 使用已解析的数字
+          price: req.body.new_price,     // 使用产品价格
+          image_url: req.body.image      // 使用产品主图
+        });
+        
+        await sku.save({ session });
+        
+        // 将SKU关联到产品
+        product.skus = [sku._id];
+        await product.save({ session });
+        
+        // 打印日志确认SKU创建
+        console.log(`Simple product SKU created with ID: ${sku.sku_id}, quantity: ${quantity}`);
+      }
+
       // 4. 如果是可配置产品，创建并关联相关模型
       if (req.body.isConfigurable) {
         // 处理属性
@@ -297,20 +329,25 @@ router.post("/add", async (req, res) => {
             // 将configurable_values对象转换为JSON字符串
             const configValues = JSON.stringify(skuItem.configurable_values);
 
+            // 确保数量是数字
+            const quantity = parseInt(skuItem.quantity) || 0;
+            
+            // 根据数量自动设置库存状态
+            const inventoryStatus = quantity > 0 ? (skuItem.inventory_status || "in_stock") : "out_of_stock";
+
             const sku = new SKU({
               sku_id: nextSkuID + index,
               product_id: productID,
               configurable_value_ids: configValues,
               sku_code: skuItem.sku_code,
-              inventory_status: skuItem.inventory_status || "in_stock",
-              quantity: skuItem.quantity || 0,
+              inventory_status: inventoryStatus,
+              quantity: quantity,
               price: skuItem.price,
               image_url: skuItem.image_url || req.body.image
             });
             await sku.save({ session });
             return sku._id;
           });
-
           const skuIds = await Promise.all(skusPromises);
           product.skus = skuIds;
         }
@@ -399,24 +436,44 @@ router.get("/adminAll", async (req, res) => {
     // 查询所有产品，包括额外的图片
     let products = await Product.find({})
       .sort({ productID: -1 }) // 按ID倒序排列，新产品在前
+      .populate('skus') // 填充SKUs以获取库存信息
       .lean(); // 使用lean()转换为纯JavaScript对象，提高性能
 
-    // 对每个产品获取其附加图片
-    const productsWithImages = await Promise.all(products.map(async (product) => {
+    // 对每个产品获取其附加图片和库存信息
+    const productsWithDetails = await Promise.all(products.map(async (product) => {
       // 获取产品的附加图片
       const images = await Image.find({
         productID: product.productID || product.id
       }).select('image_url -_id').lean();
 
-      // 返回带有附加图片的产品
+      // 计算并添加库存信息
+      let quantity = 0;
+      let inventoryStatus = 'out_of_stock';
+      
+      if (product.skus && product.skus.length > 0) {
+        if (!product.isConfigurable) {
+          // 简单产品 - 使用第一个SKU的库存
+          quantity = product.skus[0].quantity || 0;
+          inventoryStatus = product.skus[0].inventory_status || 'out_of_stock';
+        } else {
+          // 可配置产品 - 计算所有SKU的总库存
+          quantity = product.skus.reduce((sum, sku) => sum + (sku.quantity || 0), 0);
+          // 如果至少有一个SKU有库存，则产品有库存
+          inventoryStatus = product.skus.some(sku => sku.quantity > 0) ? 'in_stock' : 'out_of_stock';
+        }
+      }
+
+      // 返回带有附加图片和库存信息的产品
       return {
         ...product,
-        additional_images: images.map(img => img.image_url)
+        additional_images: images.map(img => img.image_url),
+        quantity: quantity,
+        inventory_status: inventoryStatus
       };
     }));
 
-    console.log("Admin - All Products with Images");
-    res.json(productsWithImages);
+    console.log("Admin - All Products with Images and Inventory");
+    res.json(productsWithDetails);
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, errors: "Server error" });
@@ -488,12 +545,30 @@ router.get("/adminDetail/:id", async (req, res) => {
       };
     });
 
+    let quantity = 0;
+    let inventoryStatus = 'out_of_stock';
+
+    if (skusWithValues && skusWithValues.length > 0) {
+      if (!product.isConfigurable) {
+        // 简单产品 - 使用第一个SKU的库存
+        quantity = skusWithValues[0].quantity || 0;
+        inventoryStatus = skusWithValues[0].inventory_status || 'out_of_stock';
+      } else {
+        // 可配置产品 - 计算所有SKU的总库存
+        quantity = skusWithValues.reduce((sum, sku) => sum + (parseInt(sku.quantity) || 0), 0);
+        // 如果至少有一个SKU有库存，则产品有库存
+        inventoryStatus = skusWithValues.some(sku => sku.quantity > 0) ? 'in_stock' : 'out_of_stock';
+      }
+    }
+
     // 构建完整的响应对象
     const detailedProduct = {
       ...product,
       additional_images: images.map(img => img.image_url),
       options: optionsWithValues,
-      skus: skusWithValues
+      skus: skusWithValues,
+      quantity: quantity,
+      inventory_status: inventoryStatus
     };
 
     console.log("Admin - Product Detail", productId);

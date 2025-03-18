@@ -23,7 +23,11 @@ const AddProduct = () => {
     old_price: "",
     isConfigurable: false,
     categoryID: 1,
+    quantity: 0,
+    inventory_status: "in_stock"
   });
+
+
 
   const addAttribute = () => {
     if (newAttribute.attributeName.trim() === "") return;
@@ -117,6 +121,10 @@ const AddProduct = () => {
         ...updatedSkus[index],
         [field]: value
       };
+      if (field === 'quantity') {
+        const quantity = parseInt(value) || 0;
+        updatedSkus[index].inventory_status = quantity > 0 ? 'in_stock' : 'out_of_stock';
+      }
       return updatedSkus;
     });
   };
@@ -142,6 +150,7 @@ const AddProduct = () => {
   const changeHandler = (e) => {
     setProductDetails({ ...productDetails, [e.target.name]: e.target.value });
   };
+
 
   const toggleConfigurable = () => {
     setIsConfigurable(!isConfigurable);
@@ -298,6 +307,8 @@ const AddProduct = () => {
       old_price: "",
       isConfigurable: false,
       categoryID: 1,
+      quantity: 0,
+      inventory_status: "in_stock"
     });
     setMainImage(false);
     setAdditionalImages([]);
@@ -348,6 +359,36 @@ const AddProduct = () => {
         </label>
         <input onChange={handleMainImageChange} type="file" name="mainImage" id="main-image-input" accept="image/*" hidden />
       </div>
+      {!isConfigurable && (
+        <div className="addproduct-inventory">
+          <h3>Inventory Information</h3>
+          <div className="inventory-form">
+            <div className="addproduct-itemfield">
+              <p>Quantity</p>
+              <input
+                type="number"
+                name="quantity"
+                value={productDetails.quantity}
+                onChange={changeHandler}
+                placeholder="0"
+              />
+            </div>
+            <div className="addproduct-itemfield">
+              <p>Inventory Status</p>
+              <select
+                name="inventory_status"
+                value={productDetails.inventory_status}
+                onChange={changeHandler}
+                className="add-product-selector"
+              >
+                <option value="in_stock">In Stock</option>
+                <option value="out_of_stock">Out of Stock</option>
+                <option value="backorder">Back Order</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* 添加多图片上传部分 */}
       <div className="addproduct-itemfield">

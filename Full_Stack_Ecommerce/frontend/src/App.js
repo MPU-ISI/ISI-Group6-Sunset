@@ -14,6 +14,7 @@ import Product from "./Pages/Product";
 import Shop from "./Pages/Shop";
 import ShopCategory from "./Pages/ShopCategory";
 import WishList from "./Pages/WishList";
+import Order from "./Pages/Order";
 
 export const backend_url = 'http://localhost:4000';
 export const currency = '$';
@@ -49,6 +50,7 @@ function App() {
                 </Route>
                 <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
                 <Route path="/wishList" element={<ProtectedRoute><WishList /></ProtectedRoute>} />
+                <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>}/>
                 <Route path="/login" element={<LoginSignup />} />
               </Routes>
               <Footer />

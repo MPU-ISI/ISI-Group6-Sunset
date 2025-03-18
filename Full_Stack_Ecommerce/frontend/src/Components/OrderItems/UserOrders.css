@@ -1,0 +1,199 @@
+/* UserOrders.css */
+.user-orders-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .user-orders-container h1 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 28px;
+  }
+  
+  .orders-error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .orders-loading {
+    text-align: center;
+    padding: 40px 0;
+    color: #666;
+  }
+  
+  .orders-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+  }
+  
+  .order-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+  
+  .order-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .order-number {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .order-number span {
+    font-size: 12px;
+    color: #666;
+  }
+  
+  .order-number strong {
+    font-size: 16px;
+  }
+  
+  .order-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .status-shipped {
+    background-color: #cce5ff;
+    color: #004085;
+  }
+  
+  .status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .status-hold {
+    background-color: #e2e3e5;
+    color: #383d41;
+  }
+  
+  .status-issued {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .status-complete {
+    background-color: #d6d8db;
+    color: #1b1e21;
+  }
+  
+  .status-refunded {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+  
+  .order-details {
+    padding: 15px;
+  }
+  
+  .order-detail-row {
+    display: flex;
+    margin-bottom: 10px;
+  }
+  
+  .order-detail-row span:first-child {
+    width: 60px;
+    color: #666;
+  }
+  
+  .order-items-preview {
+    flex: 1;
+  }
+  
+  .order-item-preview {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+    font-size: 14px;
+  }
+  
+  .more-items {
+    font-style: italic;
+    color: #888;
+    font-size: 13px;
+  }
+  
+  .order-actions {
+    display: flex;
+    padding: 15px;
+    border-top: 1px solid #eee;
+    gap: 10px;
+  }
+  
+  .view-order-btn, .cancel-order-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+  }
+  
+  .view-order-btn {
+    background-color: #e9ecef;
+    color: #495057;
+    flex: 1;
+  }
+  
+  .view-order-btn:hover {
+    background-color: #dee2e6;
+  }
+  
+  .cancel-order-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .cancel-order-btn:hover {
+    background-color: #c82333;
+  }
+  
+  .no-orders-message {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #666;
+  }
+  
+  .no-orders-message p:first-child {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .orders-list {
+      grid-template-columns: 1fr;
+    }
+  }

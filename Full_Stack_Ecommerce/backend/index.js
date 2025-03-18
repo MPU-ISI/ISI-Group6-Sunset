@@ -35,6 +35,7 @@ app.use("/api/products", require("./routes/products"));
 app.use("/api/cart", require("./routes/cart"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/wishlist", require("./routes/wishlist"));
+app.use("/api/orders", require("./routes/order"));
 
 // Root route
 app.get("/", (req, res) => {
