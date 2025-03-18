@@ -1,5 +1,6 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
+import productModel from "../models/productModel.js";
 import Stripe from 'stripe'
 import razorpay from 'razorpay'
 
@@ -15,12 +16,51 @@ const razorpayInstance = new razorpay({
     key_secret : process.env.RAZORPAY_KEY_SECRET,
 })
 
+// 处理下单时的库存更新
+const updateStockOnOrder = async (items) => {
+    try {
+        for (const item of items) {
+            if (item._id && item.size && item.quantity) {
+                const product = await productModel.findById(item._id);
+                if (product && product.sizes) {
+                    const currentStock = product.sizes.get(item.size) || 0;
+                    if (currentStock >= item.quantity) {
+                        product.sizes.set(item.size, currentStock - item.quantity);
+                        await product.save();
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.log("更新库存出错:", error);
+        throw error;
+    }
+}
+
 // Placing orders using COD Method
 const placeOrder = async (req,res) => {
     
     try {
         
         const { userId, items, amount, address} = req.body;
+
+        // 检查所有商品库存是否充足
+        for (const item of items) {
+            if (item._id && item.size && item.quantity) {
+                const product = await productModel.findById(item._id);
+                if (!product || !product.sizes) {
+                    return res.json({success: false, message: `商品 ${item.name} 不存在`});
+                }
+                
+                const stock = product.sizes.get(item.size) || 0;
+                if (stock < item.quantity) {
+                    return res.json({
+                        success: false, 
+                        message: `商品 ${item.name} 尺码 ${item.size} 库存不足，当前库存: ${stock}, 需要: ${item.quantity}`
+                    });
+                }
+            }
+        }
 
         const orderData = {
             userId,
@@ -32,12 +72,15 @@ const placeOrder = async (req,res) => {
             date: Date.now()
         }
 
-        const newOrder = new orderModel(orderData)
-        await newOrder.save()
+        const newOrder = new orderModel(orderData);
+        await newOrder.save();
 
-        await userModel.findByIdAndUpdate(userId,{cartData:{}})
+        // 更新库存
+        await updateStockOnOrder(items);
 
-        res.json({success:true,message:"Order Placed"})
+        await userModel.findByIdAndUpdate(userId,{cartData:{}});
+
+        res.json({success:true,message:"Order Placed"});
 
 
     } catch (error) {
@@ -53,6 +96,24 @@ const placeOrderStripe = async (req,res) => {
         
         const { userId, items, amount, address} = req.body
         const { origin } = req.headers;
+
+        // 检查所有商品库存是否充足
+        for (const item of items) {
+            if (item._id && item.size && item.quantity) {
+                const product = await productModel.findById(item._id);
+                if (!product || !product.sizes) {
+                    return res.json({success: false, message: `商品 ${item.name} 不存在`});
+                }
+                
+                const stock = product.sizes.get(item.size) || 0;
+                if (stock < item.quantity) {
+                    return res.json({
+                        success: false, 
+                        message: `商品 ${item.name} 尺码 ${item.size} 库存不足，当前库存: ${stock}, 需要: ${item.quantity}`
+                    });
+                }
+            }
+        }
 
         const orderData = {
             userId,
@@ -111,9 +172,15 @@ const verifyStripe = async (req,res) => {
 
     try {
         if (success === "true") {
-            await orderModel.findByIdAndUpdate(orderId, {payment:true});
-            await userModel.findByIdAndUpdate(userId, {cartData: {}})
-            res.json({success: true});
+            const order = await orderModel.findById(orderId);
+            if (order) {
+                await updateStockOnOrder(order.items);
+                await orderModel.findByIdAndUpdate(orderId, {payment:true});
+                await userModel.findByIdAndUpdate(userId, {cartData: {}});
+                res.json({success: true});
+            } else {
+                res.json({success: false, message: "订单不存在"});
+            }
         } else {
             await orderModel.findByIdAndDelete(orderId)
             res.json({success:false})
@@ -132,6 +199,24 @@ const placeOrderRazorpay = async (req,res) => {
         
         const { userId, items, amount, address} = req.body
 
+        // 检查所有商品库存是否充足
+        for (const item of items) {
+            if (item._id && item.size && item.quantity) {
+                const product = await productModel.findById(item._id);
+                if (!product || !product.sizes) {
+                    return res.json({success: false, message: `商品 ${item.name} 不存在`});
+                }
+                
+                const stock = product.sizes.get(item.size) || 0;
+                if (stock < item.quantity) {
+                    return res.json({
+                        success: false, 
+                        message: `商品 ${item.name} 尺码 ${item.size} 库存不足，当前库存: ${stock}, 需要: ${item.quantity}`
+                    });
+                }
+            }
+        }
+
         const orderData = {
             userId,
             items,
@@ -144,6 +229,8 @@ const placeOrderRazorpay = async (req,res) => {
 
         const newOrder = new orderModel(orderData)
         await newOrder.save()
+
+        // 支付成功后在verification中更新库存
 
         const options = {
             amount: amount * 100,
@@ -165,20 +252,30 @@ const placeOrderRazorpay = async (req,res) => {
     }
 }
 
+// Verify Razorpay
 const verifyRazorpay = async (req,res) => {
     try {
         
-        const { userId, razorpay_order_id  } = req.body
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body
+        
+        const order = await orderModel.findOne({_id:req.body.receipt})
+        
+        // update order
+        await orderModel.findOneAndUpdate({_id:req.body.receipt},{
+            'payment': true,
+            'paymentDetails.razorpay_order_id': razorpay_order_id,
+            'paymentDetails.razorpay_payment_id': razorpay_payment_id,
+            'paymentDetails.razorpay_signature': razorpay_signature
+        })
 
-        const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
-        if (orderInfo.status === 'paid') {
-            await orderModel.findByIdAndUpdate(orderInfo.receipt,{payment:true});
-            await userModel.findByIdAndUpdate(userId,{cartData:{}})
-            res.json({ success: true, message: "Payment Successful" })
-        } else {
-             res.json({ success: false, message: 'Payment Failed' });
+        // 更新库存
+        if(order) {
+            await updateStockOnOrder(order.items);
+            await userModel.findByIdAndUpdate(order.userId, {cartData: {}});
         }
 
+        res.json({success:true})
+        
     } catch (error) {
         console.log(error)
         res.json({success:false,message:error.message})

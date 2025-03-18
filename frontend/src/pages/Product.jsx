@@ -3,30 +3,60 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
+import { toast } from 'react-toastify';
 
 const Product = () => {
 
   const { productId } = useParams();
-  const { products, currency ,addToCart } = useContext(ShopContext);
+  const { products, currency, addToCart } = useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState('')
-  const [size,setSize] = useState('')
+  const [size, setSize] = useState('')
+  const [availableSizes, setAvailableSizes] = useState([]);
 
   const fetchProductData = async () => {
-
     products.map((item) => {
       if (item._id === productId) {
         setProductData(item)
         setImage(item.image[0])
+        
+        // 提取有库存的尺码
+        if (item.sizes) {
+          const available = Object.entries(item.sizes)
+            .filter(([_, stock]) => stock > 0)
+            .map(([size]) => size);
+          setAvailableSizes(available);
+        }
         return null;
       }
     })
-
   }
 
   useEffect(() => {
     fetchProductData();
-  }, [productId,products])
+  }, [productId, products])
+
+  const handleAddToCart = () => {
+    if (!size) {
+      toast.error('请选择产品尺码');
+      return;
+    }
+
+    // 检查所选尺码是否有库存
+    if (productData.sizes && productData.sizes[size] <= 0) {
+      toast.error('所选尺码已售罄');
+      return;
+    }
+
+    addToCart(productData._id, size);
+  }
+
+  const checkStock = (sizeOption) => {
+    if (productData.sizes && productData.sizes[sizeOption] !== undefined) {
+      return productData.sizes[sizeOption] > 0;
+    }
+    return false;
+  }
 
   return productData ? (
     <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
@@ -61,19 +91,40 @@ const Product = () => {
           <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
           <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
           <div className='flex flex-col gap-4 my-8'>
-              <p>Select Size</p>
+              <p>选择尺码</p>
               <div className='flex gap-2'>
-                {productData.sizes.map((item,index)=>(
-                  <button onClick={()=>setSize(item)} className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''}`} key={index}>{item}</button>
-                ))}
+                {Object.keys(productData.sizes || {}).map((sizeOption, index) => {
+                  const hasStock = checkStock(sizeOption);
+                  return (
+                    <button 
+                      onClick={() => hasStock ? setSize(sizeOption) : toast.error('尺码已售罄')} 
+                      className={`border py-2 px-4 ${hasStock ? 'bg-gray-100' : 'bg-gray-200 text-gray-500 cursor-not-allowed'} 
+                        ${sizeOption === size ? 'border-orange-500' : ''}`} 
+                      key={index}
+                      disabled={!hasStock}
+                    >
+                      {sizeOption}
+                      {!hasStock && <span className="block text-xs text-red-500">售罄</span>}
+                    </button>
+                  )
+                })}
               </div>
+              {availableSizes.length === 0 && (
+                <p className="text-red-500 text-sm">所有尺码均已售罄</p>
+              )}
           </div>
-          <button onClick={()=>addToCart(productData._id,size)} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>ADD TO CART</button>
+          <button 
+            onClick={handleAddToCart} 
+            className={`bg-black text-white px-8 py-3 text-sm ${availableSizes.length === 0 ? 'opacity-50 cursor-not-allowed' : 'active:bg-gray-700'}`}
+            disabled={availableSizes.length === 0}
+          >
+            添加到购物车
+          </button>
           <hr className='mt-8 sm:w-4/5' />
           <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
-              <p>100% Original product.</p>
-              <p>Cash on delivery is available on this product.</p>
-              <p>Easy return and exchange policy within 7 days.</p>
+              <p>100% 正品保证.</p>
+              <p>支持货到付款.</p>
+              <p>七天内轻松退换.</p>
           </div>
         </div>
       </div>
@@ -81,8 +132,8 @@ const Product = () => {
       {/* ---------- Description & Review Section ------------- */}
       <div className='mt-20'>
         <div className='flex'>
-          <b className='border px-5 py-3 text-sm'>Description</b>
-          <p className='border px-5 py-3 text-sm'>Reviews (122)</p>
+          <b className='border px-5 py-3 text-sm'>商品描述</b>
+          <p className='border px-5 py-3 text-sm'>评价 (122)</p>
         </div>
         <div className='flex flex-col gap-4 border px-6 py-6 text-sm text-gray-500'>
           <p>An e-commerce website is an online platform that facilitates the buying and selling of products or services over the internet. It serves as a virtual marketplace where businesses and individuals can showcase their products, interact with customers, and conduct transactions without the need for a physical presence. E-commerce websites have gained immense popularity due to their convenience, accessibility, and the global reach they offer.</p>

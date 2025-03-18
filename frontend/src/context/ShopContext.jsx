@@ -19,13 +19,31 @@ const ShopContextProvider = (props) => {
 
 
     const addToCart = async (itemId, size) => {
-
         if (!size) {
-            toast.error('Select Product Size');
+            toast.error('请选择产品尺码');
+            return;
+        }
+
+        // 检查库存
+        const product = products.find(p => p._id === itemId);
+        if (!product) {
+            toast.error('产品不存在');
+            return;
+        }
+
+        if (!product.sizes || product.sizes[size] <= 0) {
+            toast.error('所选尺码已售罄');
             return;
         }
 
         let cartData = structuredClone(cartItems);
+        const currentQuantity = cartData[itemId]?.[size] || 0;
+        
+        // 检查购物车中已有数量+1是否超过库存
+        if (currentQuantity + 1 > product.sizes[size]) {
+            toast.error(`该尺码库存不足，当前库存: ${product.sizes[size]}`);
+            return;
+        }
 
         if (cartData[itemId]) {
             if (cartData[itemId][size]) {
@@ -43,27 +61,33 @@ const ShopContextProvider = (props) => {
 
         if (token) {
             try {
-
-                await axios.post(backendUrl + '/api/cart/add', { itemId, size }, { headers: { token } })
-
+                // 只更新购物车，不更新库存
+                await axios.post(backendUrl + '/api/cart/add', { itemId, size }, { headers: { token } });
             } catch (error) {
-                console.log(error)
-                toast.error(error.message)
+                console.log(error);
+                toast.error(error.message);
             }
         }
-
     }
 
     const getCartCount = () => {
         let totalCount = 0;
         for (const items in cartItems) {
+            // 检查该商品是否存在于products中
+            const productExists = products.find(p => p._id === items);
+            if (!productExists) continue;
+
             for (const item in cartItems[items]) {
                 try {
                     if (cartItems[items][item] > 0) {
-                        totalCount += cartItems[items][item];
+                        // 检查该尺码的库存是否足够
+                        const sizeAvailable = productExists.sizes && productExists.sizes[item] > 0;
+                        if (sizeAvailable) {
+                            totalCount += cartItems[items][item];
+                        }
                     }
                 } catch (error) {
-
+                    console.error("Error counting cart items:", error);
                 }
             }
         }
@@ -71,37 +95,72 @@ const ShopContextProvider = (props) => {
     }
 
     const updateQuantity = async (itemId, size, quantity) => {
-
-        let cartData = structuredClone(cartItems);
-
-        cartData[itemId][size] = quantity;
-
-        setCartItems(cartData)
-
-        if (token) {
-            try {
-
-                await axios.post(backendUrl + '/api/cart/update', { itemId, size, quantity }, { headers: { token } })
-
-            } catch (error) {
-                console.log(error)
-                toast.error(error.message)
-            }
+        // 找到当前商品
+        const product = products.find(p => p._id === itemId);
+        if (!product) {
+            toast.error('产品不存在');
+            return;
         }
 
+        // 获取当前购物车中的数量
+        let cartData = structuredClone(cartItems);
+        const currentQuantity = cartData[itemId]?.[size] || 0;
+        
+        // 如果要减少数量
+        if (quantity < currentQuantity) {
+            cartData[itemId][size] = quantity;
+            setCartItems(cartData);
+
+            if (token) {
+                try {
+                    // 只更新购物车
+                    await axios.post(backendUrl + '/api/cart/update', { itemId, size, quantity }, { headers: { token } });
+                } catch (error) {
+                    console.log(error);
+                    toast.error(error.message);
+                }
+            }
+        } 
+        // 如果要增加数量
+        else if (quantity > currentQuantity) {
+            // 检查是否有足够的库存
+            if (!product.sizes || product.sizes[size] < (quantity - currentQuantity)) {
+                toast.error(`库存不足，当前可用: ${product.sizes?.[size] || 0}`);
+                return;
+            }
+
+            cartData[itemId][size] = quantity;
+            setCartItems(cartData);
+
+            if (token) {
+                try {
+                    // 只更新购物车
+                    await axios.post(backendUrl + '/api/cart/update', { itemId, size, quantity }, { headers: { token } });
+                } catch (error) {
+                    console.log(error);
+                    toast.error(error.message);
+                }
+            }
+        }
     }
 
     const getCartAmount = () => {
         let totalAmount = 0;
         for (const items in cartItems) {
             let itemInfo = products.find((product) => product._id === items);
+            if (!itemInfo) continue; // 如果产品不存在则跳过
+            
             for (const item in cartItems[items]) {
                 try {
                     if (cartItems[items][item] > 0) {
-                        totalAmount += itemInfo.price * cartItems[items][item];
+                        // 检查该尺码是否有库存
+                        const sizeAvailable = itemInfo.sizes && itemInfo.sizes[item] > 0;
+                        if (sizeAvailable) {
+                            totalAmount += itemInfo.price * cartItems[items][item];
+                        }
                     }
                 } catch (error) {
-
+                    console.error("Error calculating cart amount:", error);
                 }
             }
         }

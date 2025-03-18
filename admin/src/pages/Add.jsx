@@ -17,7 +17,7 @@ const Add = ({token}) => {
    const [category, setCategory] = useState("Men");
    const [subCategory, setSubCategory] = useState("Topwear");
    const [bestseller, setBestseller] = useState(false);
-   const [sizes, setSizes] = useState([]);
+   const [sizes, setSizes] = useState({});
 
    const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -50,6 +50,7 @@ const Add = ({token}) => {
         setImage3(false)
         setImage4(false)
         setPrice('')
+        setSizes({})
       } else {
         toast.error(response.data.message)
       }
@@ -58,6 +59,25 @@ const Add = ({token}) => {
       console.log(error);
       toast.error(error.message)
     }
+   }
+
+   const handleSizeChange = (size) => {
+    setSizes(prev => {
+      const newSizes = {...prev};
+      if (newSizes[size] !== undefined) {
+        delete newSizes[size];
+      } else {
+        newSizes[size] = 0;
+      }
+      return newSizes;
+    });
+   }
+
+   const handleStockChange = (size, value) => {
+    setSizes(prev => ({
+      ...prev,
+      [size]: parseInt(value) || 0
+    }));
    }
 
   return (
@@ -123,26 +143,86 @@ const Add = ({token}) => {
         </div>
 
         <div>
-          <p className='mb-2'>Product Sizes</p>
-          <div className='flex gap-3'>
-            <div onClick={()=>setSizes(prev => prev.includes("S") ? prev.filter( item => item !== "S") : [...prev,"S"])}>
-              <p className={`${sizes.includes("S") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>S</p>
+          <p className='mb-2'>Product Sizes & Stock</p>
+          <div className='flex flex-wrap gap-3'>
+            <div className='flex flex-col items-center'>
+              <div onClick={() => handleSizeChange("S")}>
+                <p className={`${sizes["S"] !== undefined ? "bg-pink-100" : "bg-slate-200"} px-3 py-1 cursor-pointer`}>S</p>
+              </div>
+              {sizes["S"] !== undefined && (
+                <input 
+                  type="number" 
+                  min="0"
+                  value={sizes["S"]} 
+                  onChange={(e) => handleStockChange("S", e.target.value)}
+                  className="mt-1 border w-16 text-center"
+                  placeholder="Stock"
+                />
+              )}
             </div>
             
-            <div onClick={()=>setSizes(prev => prev.includes("M") ? prev.filter( item => item !== "M") : [...prev,"M"])}>
-              <p className={`${sizes.includes("M") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>M</p>
+            <div className='flex flex-col items-center'>
+              <div onClick={() => handleSizeChange("M")}>
+                <p className={`${sizes["M"] !== undefined ? "bg-pink-100" : "bg-slate-200"} px-3 py-1 cursor-pointer`}>M</p>
+              </div>
+              {sizes["M"] !== undefined && (
+                <input 
+                  type="number" 
+                  min="0"
+                  value={sizes["M"]} 
+                  onChange={(e) => handleStockChange("M", e.target.value)}
+                  className="mt-1 border w-16 text-center"
+                  placeholder="Stock"
+                />
+              )}
             </div>
 
-            <div onClick={()=>setSizes(prev => prev.includes("L") ? prev.filter( item => item !== "L") : [...prev,"L"])}>
-              <p className={`${sizes.includes("L") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>L</p>
+            <div className='flex flex-col items-center'>
+              <div onClick={() => handleSizeChange("L")}>
+                <p className={`${sizes["L"] !== undefined ? "bg-pink-100" : "bg-slate-200"} px-3 py-1 cursor-pointer`}>L</p>
+              </div>
+              {sizes["L"] !== undefined && (
+                <input 
+                  type="number" 
+                  min="0"
+                  value={sizes["L"]} 
+                  onChange={(e) => handleStockChange("L", e.target.value)}
+                  className="mt-1 border w-16 text-center"
+                  placeholder="Stock"
+                />
+              )}
             </div>
 
-            <div onClick={()=>setSizes(prev => prev.includes("XL") ? prev.filter( item => item !== "XL") : [...prev,"XL"])}>
-              <p className={`${sizes.includes("XL") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>XL</p>
+            <div className='flex flex-col items-center'>
+              <div onClick={() => handleSizeChange("XL")}>
+                <p className={`${sizes["XL"] !== undefined ? "bg-pink-100" : "bg-slate-200"} px-3 py-1 cursor-pointer`}>XL</p>
+              </div>
+              {sizes["XL"] !== undefined && (
+                <input 
+                  type="number" 
+                  min="0"
+                  value={sizes["XL"]} 
+                  onChange={(e) => handleStockChange("XL", e.target.value)}
+                  className="mt-1 border w-16 text-center"
+                  placeholder="Stock"
+                />
+              )}
             </div>
 
-            <div onClick={()=>setSizes(prev => prev.includes("XXL") ? prev.filter( item => item !== "XXL") : [...prev,"XXL"])}>
-              <p className={`${sizes.includes("XXL") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>XXL</p>
+            <div className='flex flex-col items-center'>
+              <div onClick={() => handleSizeChange("XXL")}>
+                <p className={`${sizes["XXL"] !== undefined ? "bg-pink-100" : "bg-slate-200"} px-3 py-1 cursor-pointer`}>XXL</p>
+              </div>
+              {sizes["XXL"] !== undefined && (
+                <input 
+                  type="number" 
+                  min="0"
+                  value={sizes["XXL"]} 
+                  onChange={(e) => handleStockChange("XXL", e.target.value)}
+                  className="mt-1 border w-16 text-center"
+                  placeholder="Stock"
+                />
+              )}
             </div>
           </div>
         </div>

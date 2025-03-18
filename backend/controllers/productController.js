@@ -86,4 +86,42 @@ const singleProduct = async (req, res) => {
     }
 }
 
-export { listProducts, addProduct, removeProduct, singleProduct }
+// function for updating product stock
+const updateProductStock = async (req, res) => {
+    try {
+        const { productId, size, quantity } = req.body;
+
+        if (!productId || !size || quantity === undefined) {
+            return res.json({ success: false, message: "缺少必要参数" });
+        }
+
+        const product = await productModel.findById(productId);
+        
+        if (!product) {
+            return res.json({ success: false, message: "产品不存在" });
+        }
+
+        // 获取当前尺码的库存
+        const currentStock = product.sizes.get(size) || 0;
+        
+        // 计算新库存
+        const newStock = currentStock + Number(quantity);
+        
+        // 确保库存不小于0
+        if (newStock < 0) {
+            return res.json({ success: false, message: "库存不足" });
+        }
+
+        // 更新库存
+        product.sizes.set(size, newStock);
+        await product.save();
+
+        res.json({ success: true, message: "库存已更新", newStock });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export { listProducts, addProduct, removeProduct, singleProduct, updateProductStock }
