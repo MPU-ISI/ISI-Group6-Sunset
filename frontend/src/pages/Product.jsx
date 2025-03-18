@@ -20,7 +20,7 @@ const Product = () => {
         setProductData(item)
         setImage(item.image[0])
         
-        // 提取有库存的尺码
+        // Extract sizes with stock
         if (item.sizes) {
           const available = Object.entries(item.sizes)
             .filter(([_, stock]) => stock > 0)
@@ -38,13 +38,13 @@ const Product = () => {
 
   const handleAddToCart = () => {
     if (!size) {
-      toast.error('请选择产品尺码');
+      toast.error('Please select a size');
       return;
     }
 
-    // 检查所选尺码是否有库存
+    // Check if selected size has stock
     if (productData.sizes && productData.sizes[size] <= 0) {
-      toast.error('所选尺码已售罄');
+      toast.error('Selected size is out of stock');
       return;
     }
 
@@ -91,26 +91,26 @@ const Product = () => {
           <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
           <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
           <div className='flex flex-col gap-4 my-8'>
-              <p>选择尺码</p>
+              <p>Select Size</p>
               <div className='flex gap-2'>
                 {Object.keys(productData.sizes || {}).map((sizeOption, index) => {
                   const hasStock = checkStock(sizeOption);
                   return (
                     <button 
-                      onClick={() => hasStock ? setSize(sizeOption) : toast.error('尺码已售罄')} 
+                      onClick={() => hasStock ? setSize(sizeOption) : toast.error('Size is out of stock')} 
                       className={`border py-2 px-4 ${hasStock ? 'bg-gray-100' : 'bg-gray-200 text-gray-500 cursor-not-allowed'} 
                         ${sizeOption === size ? 'border-orange-500' : ''}`} 
                       key={index}
                       disabled={!hasStock}
                     >
                       {sizeOption}
-                      {!hasStock && <span className="block text-xs text-red-500">售罄</span>}
+                      {!hasStock && <span className="block text-xs text-red-500">Out of Stock</span>}
                     </button>
                   )
                 })}
               </div>
               {availableSizes.length === 0 && (
-                <p className="text-red-500 text-sm">所有尺码均已售罄</p>
+                <p className="text-red-500 text-sm">All sizes are out of stock</p>
               )}
           </div>
           <button 
@@ -118,13 +118,13 @@ const Product = () => {
             className={`bg-black text-white px-8 py-3 text-sm ${availableSizes.length === 0 ? 'opacity-50 cursor-not-allowed' : 'active:bg-gray-700'}`}
             disabled={availableSizes.length === 0}
           >
-            添加到购物车
+            Add to Cart
           </button>
           <hr className='mt-8 sm:w-4/5' />
           <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
-              <p>100% 正品保证.</p>
-              <p>支持货到付款.</p>
-              <p>七天内轻松退换.</p>
+              <p>100% Authentic Products.</p>
+              <p>Cash on Delivery Available.</p>
+              <p>Easy Returns within 7 Days.</p>
           </div>
         </div>
       </div>
@@ -132,8 +132,8 @@ const Product = () => {
       {/* ---------- Description & Review Section ------------- */}
       <div className='mt-20'>
         <div className='flex'>
-          <b className='border px-5 py-3 text-sm'>商品描述</b>
-          <p className='border px-5 py-3 text-sm'>评价 (122)</p>
+          <b className='border px-5 py-3 text-sm'>Product Description</b>
+          <p className='border px-5 py-3 text-sm'>Reviews (122)</p>
         </div>
         <div className='flex flex-col gap-4 border px-6 py-6 text-sm text-gray-500'>
           <p>An e-commerce website is an online platform that facilitates the buying and selling of products or services over the internet. It serves as a virtual marketplace where businesses and individuals can showcase their products, interact with customers, and conduct transactions without the need for a physical presence. E-commerce websites have gained immense popularity due to their convenience, accessibility, and the global reach they offer.</p>

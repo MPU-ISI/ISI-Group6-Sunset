@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import { assets } from '../assets/assets'
@@ -21,6 +21,52 @@ const PlaceOrder = () => {
         country: '',
         phone: ''
     })
+    const [loading, setLoading] = useState(true);
+
+    // Fetch user shipping address
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            if (token) {
+                try {
+                    setLoading(true);
+                    console.log("Fetching user info with token:", token);
+                    const response = await axios.get(backendUrl + '/api/user/info', {
+                        headers: { token }
+                    });
+                    
+                    console.log("User info API response:", response.data);
+                    
+                    if (response.data.success && response.data.user.shippingAddress) {
+                        // Auto-fill shipping address
+                        const { shippingAddress } = response.data.user;
+                        console.log("Found shipping address:", shippingAddress);
+                        setFormData({
+                            firstName: shippingAddress.firstName || '',
+                            lastName: shippingAddress.lastName || '',
+                            email: response.data.user.email || '',
+                            street: shippingAddress.street || '',
+                            city: shippingAddress.city || '',
+                            state: shippingAddress.state || '',
+                            zipcode: shippingAddress.zipcode || '',
+                            country: shippingAddress.country || '',
+                            phone: shippingAddress.phone || ''
+                        });
+                    } else {
+                        console.log("No shipping address found or API call failed");
+                    }
+                } catch (error) {
+                    console.log('Error fetching user info:', error);
+                } finally {
+                    setLoading(false);
+                }
+            } else {
+                console.log("No token available, skipping user info fetch");
+                setLoading(false);
+            }
+        };
+
+        fetchUserInfo();
+    }, [token, backendUrl]);
 
     const onChangeHandler = (event) => {
         const name = event.target.name
@@ -106,18 +152,15 @@ const PlaceOrder = () => {
                     break;
 
                 case 'razorpay':
-
                     const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
                     if (responseRazorpay.data.success) {
                         initPay(responseRazorpay.data.order)
                     }
-
                     break;
 
                 default:
                     break;
             }
-
 
         } catch (error) {
             console.log(error)
@@ -125,6 +168,13 @@ const PlaceOrder = () => {
         }
     }
 
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <div className="animate-spin h-10 w-10 border-4 border-gray-300 rounded-full border-t-black"></div>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t'>
@@ -145,10 +195,10 @@ const PlaceOrder = () => {
                     <input onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
                 </div>
                 <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Zipcode' />
+                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Zipcode' />
                     <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
                 </div>
-                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone' />
+                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Phone' />
             </div>
 
             {/* ------------- Right Side ------------------ */}

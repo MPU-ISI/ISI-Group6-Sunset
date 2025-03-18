@@ -11,7 +11,13 @@ const Collection = () => {
   const [filterProducts,setFilterProducts] = useState([]);
   const [category,setCategory] = useState([]);
   const [subCategory,setSubCategory] = useState([]);
-  const [sortType,setSortType] = useState('relavent')
+  const [sortType,setSortType] = useState('relavent');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(8);
+  const [paginatedProducts, setPaginatedProducts] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
 
   const toggleCategory = (e) => {
 
@@ -50,8 +56,9 @@ const Collection = () => {
       productsCopy = productsCopy.filter(item => subCategory.includes(item.subCategory))
     }
 
-    setFilterProducts(productsCopy)
-
+    setFilterProducts(productsCopy);
+    // Reset to first page when filters change
+    setCurrentPage(1);
   }
 
   const sortProduct = () => {
@@ -71,7 +78,27 @@ const Collection = () => {
         applyFilter();
         break;
     }
+  }
 
+  // Handle pagination
+  const paginate = () => {
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filterProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+    setPaginatedProducts(currentProducts);
+    setTotalPages(Math.ceil(filterProducts.length / productsPerPage));
+  }
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo(0, 0);
+  }
+
+  // Generate page numbers
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
   }
 
   useEffect(()=>{
@@ -81,6 +108,10 @@ const Collection = () => {
   useEffect(()=>{
     sortProduct();
   },[sortType])
+
+  useEffect(() => {
+    paginate();
+  }, [filterProducts, currentPage, productsPerPage])
 
   return (
     <div className='flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t'>
@@ -138,10 +169,51 @@ const Collection = () => {
         {/* Map Products */}
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
           {
-            filterProducts.map((item,index)=>(
+            paginatedProducts.map((item,index)=>(
               <ProductItem key={index} name={item.name} id={item._id} price={item.price} image={item.image} />
             ))
           }
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className='flex justify-center mt-8 mb-6'>
+            <div className='flex space-x-1'>
+              {/* Previous Button */}
+              <button 
+                onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} 
+                className={`px-3 py-1 rounded border ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              
+              {/* Page Numbers */}
+              {pageNumbers.map(number => (
+                <button
+                  key={number}
+                  onClick={() => handlePageChange(number)}
+                  className={`px-3 py-1 rounded ${currentPage === number ? 'bg-black text-white' : 'hover:bg-gray-100 border'}`}
+                >
+                  {number}
+                </button>
+              ))}
+              
+              {/* Next Button */}
+              <button 
+                onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)} 
+                className={`px-3 py-1 rounded border ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Results Count */}
+        <div className='text-sm text-gray-500 text-center mb-4'>
+          Showing {paginatedProducts.length} of {filterProducts.length} products
         </div>
       </div>
 

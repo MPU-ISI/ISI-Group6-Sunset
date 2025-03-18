@@ -20,28 +20,28 @@ const ShopContextProvider = (props) => {
 
     const addToCart = async (itemId, size) => {
         if (!size) {
-            toast.error('请选择产品尺码');
+            toast.error('Please select a size');
             return;
         }
 
-        // 检查库存
+        // Check stock
         const product = products.find(p => p._id === itemId);
         if (!product) {
-            toast.error('产品不存在');
+            toast.error('Product does not exist');
             return;
         }
 
         if (!product.sizes || product.sizes[size] <= 0) {
-            toast.error('所选尺码已售罄');
+            toast.error('Selected size is out of stock');
             return;
         }
 
         let cartData = structuredClone(cartItems);
         const currentQuantity = cartData[itemId]?.[size] || 0;
         
-        // 检查购物车中已有数量+1是否超过库存
+        // Check if adding one more would exceed stock
         if (currentQuantity + 1 > product.sizes[size]) {
-            toast.error(`该尺码库存不足，当前库存: ${product.sizes[size]}`);
+            toast.error(`Insufficient stock. Available: ${product.sizes[size]}`);
             return;
         }
 
@@ -61,7 +61,7 @@ const ShopContextProvider = (props) => {
 
         if (token) {
             try {
-                // 只更新购物车，不更新库存
+                // Only update cart, not stock
                 await axios.post(backendUrl + '/api/cart/add', { itemId, size }, { headers: { token } });
             } catch (error) {
                 console.log(error);
@@ -95,25 +95,25 @@ const ShopContextProvider = (props) => {
     }
 
     const updateQuantity = async (itemId, size, quantity) => {
-        // 找到当前商品
+        // Find current product
         const product = products.find(p => p._id === itemId);
         if (!product) {
-            toast.error('产品不存在');
+            toast.error('Product does not exist');
             return;
         }
 
-        // 获取当前购物车中的数量
+        // Get current quantity in cart
         let cartData = structuredClone(cartItems);
         const currentQuantity = cartData[itemId]?.[size] || 0;
         
-        // 如果要减少数量
+        // If decreasing quantity
         if (quantity < currentQuantity) {
             cartData[itemId][size] = quantity;
             setCartItems(cartData);
 
             if (token) {
                 try {
-                    // 只更新购物车
+                    // Only update cart
                     await axios.post(backendUrl + '/api/cart/update', { itemId, size, quantity }, { headers: { token } });
                 } catch (error) {
                     console.log(error);
@@ -121,11 +121,11 @@ const ShopContextProvider = (props) => {
                 }
             }
         } 
-        // 如果要增加数量
+        // If increasing quantity
         else if (quantity > currentQuantity) {
-            // 检查是否有足够的库存
+            // Check if there's enough stock
             if (!product.sizes || product.sizes[size] < (quantity - currentQuantity)) {
-                toast.error(`库存不足，当前可用: ${product.sizes?.[size] || 0}`);
+                toast.error(`Insufficient stock. Available: ${product.sizes?.[size] || 0}`);
                 return;
             }
 
@@ -134,7 +134,7 @@ const ShopContextProvider = (props) => {
 
             if (token) {
                 try {
-                    // 只更新购物车
+                    // Only update cart
                     await axios.post(backendUrl + '/api/cart/update', { itemId, size, quantity }, { headers: { token } });
                 } catch (error) {
                     console.log(error);

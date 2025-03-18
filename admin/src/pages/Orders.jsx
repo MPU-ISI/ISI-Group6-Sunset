@@ -20,6 +20,7 @@ const Orders = ({ token }) => {
 
       const response = await axios.post(backendUrl + '/api/order/list', {}, { headers: { token } })
       if (response.data.success) {
+        console.log("管理员获取到的订单:", response.data.orders);
         setOrders(response.data.orders.reverse())
       } else {
         toast.error(response.data.message)
@@ -65,24 +66,48 @@ const Orders = ({ token }) => {
     }
   };
 
+  // 运行一次性迁移，为现有订单添加orderId
+  const migrateOrderIds = async () => {
+    try {
+      const response = await axios.post(backendUrl + '/api/order/migrateOrderIds', {}, { headers: { token } });
+      if (response.data.success) {
+        toast.success(response.data.message);
+        await fetchAllOrders();
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("迁移订单ID失败");
+    }
+  };
+
   return (
     <div>
       <h3>Order Page</h3>
-      <div>
-        <label>Filter Order Status:</label>
-        <select value={filterStatus} onChange={handleFilterChange}>
-          <option value="">All Status</option>
-          <option value="Order Placed">Order Placed</option>
-          <option value="Packing">Packing</option>
-          <option value="Shipped">Shipped</option>
-          <option value="Out for delivery">Out for delivery</option>
-          <option value="Delivered">Delivered</option>
-        </select>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <label>Filter Order Status:</label>
+          <select value={filterStatus} onChange={handleFilterChange}>
+            <option value="">All Status</option>
+            <option value="Order Placed">Order Placed</option>
+            <option value="Packing">Packing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Out for delivery">Out for delivery</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+        <button 
+          onClick={migrateOrderIds}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          为现有订单添加订单ID
+        </button>
       </div>
       <div>
         {filteredOrders.map((order, index) => (
           <div className='grid grid-cols-1 sm:grid-cols-[0.5fr_2fr_1fr] lg:grid-cols-[0.5fr_2fr_1fr_1fr_1fr] gap-3 items-start border-2 border-gray-200 p-5 md:p-8 my-3 md:my-4 text-xs sm:text-sm text-gray-700' key={index}>
-            <div className='font-bold'>Order ID: {index + 1}</div>
+            <div className='font-bold'>Order ID: #{order.orderId || '未设置'}</div>
             <img className='w-12' src={assets.parcel_icon} alt="" />
             <div>
               <div>

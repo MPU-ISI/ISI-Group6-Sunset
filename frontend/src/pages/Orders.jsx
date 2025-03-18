@@ -17,21 +17,24 @@ const Orders = () => {
 
       const response = await axios.post(backendUrl + '/api/order/userorders',{},{headers:{token}})
       if (response.data.success) {
+        console.log("获取到的订单数据:", response.data.orders);
         let allOrdersItem = []
         response.data.orders.map((order)=>{
+          console.log("订单ID:", order.orderId);
           order.items.map((item)=>{
             item['status'] = order.status
             item['payment'] = order.payment
             item['paymentMethod'] = order.paymentMethod
             item['date'] = order.date
+            item['orderId'] = order.orderId
             allOrdersItem.push(item)
           })
         })
-        setorderData(allOrdersItem.reverse())
+        setorderData(allOrdersItem)
       }
       
     } catch (error) {
-      
+      console.error("加载订单数据出错:", error);
     }
   }
 
@@ -59,8 +62,9 @@ const Orders = () => {
                             <p>Quantity: {item.quantity}</p>
                             <p>Size: {item.size}</p>
                           </div>
-                          <p className='mt-1'>Date: <span className=' text-gray-400'>{new Date(item.date).toDateString()}</span></p>
-                          <p className='mt-1'>Payment: <span className=' text-gray-400'>{item.paymentMethod}</span></p>
+                          <p className='mt-1'>Order ID: <span className='text-gray-400'>#{item.orderId || '无订单号'}</span></p>
+                          <p className='mt-1'>Date: <span className='text-gray-400'>{new Date(item.date).toDateString()}</span></p>
+                          <p className='mt-1'>Payment: <span className='text-gray-400'>{item.paymentMethod}</span></p>
                         </div>
                     </div>
                     <div className='md:w-1/2 flex justify-between'>

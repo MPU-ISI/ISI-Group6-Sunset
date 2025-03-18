@@ -42,7 +42,13 @@ const loginUser = async (req, res) => {
 const registerUser = async (req, res) => {
     try {
 
-        const { name, email, password } = req.body;
+        const { name, email, password, shippingAddress } = req.body;
+        
+        console.log("Registration request received:");
+        console.log("Name:", name);
+        console.log("Email:", email);
+        console.log("Password:", password ? "password provided" : "no password");
+        console.log("Shipping Address:", shippingAddress);
 
         // checking user already exists or not
         const exists = await userModel.findOne({ email });
@@ -65,10 +71,18 @@ const registerUser = async (req, res) => {
         const newUser = new userModel({
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            shippingAddress: shippingAddress || {}
         })
+        
+        console.log("Creating new user with data:", {
+            name,
+            email,
+            shippingAddress: shippingAddress || {}
+        });
 
         const user = await newUser.save()
+        console.log("User saved successfully:", user._id);
 
         const token = createToken(user._id)
 
@@ -99,5 +113,74 @@ const adminLogin = async (req, res) => {
     }
 }
 
+// Get user info route
+const getUserInfo = async (req, res) => {
+    try {
+        console.log("Getting user info with ID:", req.body.userId);
+        
+        if (!req.body.userId) {
+            return res.json({ success: false, message: "User ID not found in request" });
+        }
+        
+        const user = await userModel.findById(req.body.userId).select('-password');
+        
+        if (!user) {
+            console.log("User not found in database");
+            return res.json({ success: false, message: "User not found" });
+        }
+        
+        console.log("User found:", user._id);
+        console.log("Shipping address:", user.shippingAddress);
+        
+        res.json({ success: true, user });
+    } catch (error) {
+        console.log("Error in getUserInfo:", error);
+        res.json({ success: false, message: error.message });
+    }
+}
 
-export { loginUser, registerUser, adminLogin }
+// Test auth and shipping address
+const testAuth = async (req, res) => {
+    try {
+        console.log("Test auth endpoint called");
+        console.log("Request userId:", req.body.userId);
+        
+        if (!req.body.userId) {
+            return res.json({ 
+                success: false, 
+                message: "Authentication failed", 
+                debug: { 
+                    userId: req.body.userId, 
+                    headers: req.headers 
+                }
+            });
+        }
+        
+        const user = await userModel.findById(req.body.userId);
+        if (!user) {
+            return res.json({ 
+                success: false, 
+                message: "User not found", 
+                userId: req.body.userId 
+            });
+        }
+        
+        return res.json({
+            success: true,
+            message: "Authentication successful",
+            userId: user._id,
+            name: user.name,
+            hasShippingAddress: !!user.shippingAddress,
+            shippingAddressData: user.shippingAddress
+        });
+    } catch (error) {
+        console.log("Error in test auth:", error);
+        return res.json({
+            success: false,
+            message: error.message,
+            stack: error.stack
+        });
+    }
+}
+
+export { loginUser, registerUser, adminLogin, getUserInfo, testAuth }
