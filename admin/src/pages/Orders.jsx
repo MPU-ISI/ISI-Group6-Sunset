@@ -47,17 +47,23 @@ const Orders = ({ token }) => {
     }
   }, [filterStatus, orders])
 
-  const statusHandler = async ( event, orderId ) => {
+  const statusHandler = async (event, orderId) => {
     try {
-      const response = await axios.post(backendUrl + '/api/order/status' , {orderId, status:event.target.value}, { headers: {token}})
+      const currentDate = new Date();
+      const response = await axios.post(backendUrl + '/api/order/status', {
+        orderId,
+        status: event.target.value,
+        statusChangeDate: currentDate
+      }, { headers: { token } });
+
       if (response.data.success) {
-        await fetchAllOrders()
+        await fetchAllOrders();
       }
     } catch (error) {
-      console.log(error)
-      toast.error(response.data.message)
+      console.log(error);
+      toast.error(response.data.message);
     }
-  }
+  };
 
   return (
     <div>
@@ -100,6 +106,7 @@ const Orders = ({ token }) => {
               <p className='mt-3'>Method : {order.paymentMethod}</p>
               <p>Payment : { order.payment ? 'Done' : 'Pending' }</p>
               <p>Date : {new Date(order.date).toLocaleDateString()}</p>
+              {order.statusChangeDate && <p>Status Change Date: {new Date(order.statusChangeDate).toLocaleDateString()}</p>}
             </div>
             <p className='text-sm sm:text-[15px]'>{currency}{order.amount}</p>
             <select onChange={(event)=>statusHandler(event,order._id)} value={order.status} className='p-2 font-semibold'>
