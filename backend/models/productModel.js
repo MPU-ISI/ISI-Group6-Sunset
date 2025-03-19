@@ -13,6 +13,7 @@ const productSchema = new mongoose.Schema({
         required: true 
     },
     bestseller: { type: Boolean },
+    enabled: { type: Boolean, default: true },
     date: { type: Number, required: true }
 })
 
