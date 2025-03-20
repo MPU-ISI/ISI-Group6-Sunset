@@ -27,6 +27,7 @@ const Orders = () => {
             item['paymentMethod'] = order.paymentMethod
             item['date'] = order.date
             item['orderId'] = order.orderId
+            item['subtotal'] = item.price * item.quantity
             allOrdersItem.push(item)
           })
         })
@@ -61,6 +62,9 @@ const Orders = () => {
                             <p>{currency}{item.price}</p>
                             <p>Quantity: {item.quantity}</p>
                             <p>Size: {item.size}</p>
+                          </div>
+                          <div className='mt-2 text-base font-medium text-gray-800'>
+                            <p>Subtotal: {currency}{item.subtotal}</p>
                           </div>
                           <p className='mt-1'>Order ID: <span className='text-gray-400'>#{item.orderId || '无订单号'}</span></p>
                           <p className='mt-1'>Date: <span className='text-gray-400'>{new Date(item.date).toDateString()}</span></p>

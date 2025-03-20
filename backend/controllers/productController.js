@@ -49,7 +49,7 @@ const addProduct = async (req, res) => {
 // function for list product
 const listProducts = async (req, res) => {
     try {
-        const { search, showDisabled } = req.query;
+        const { search, showDisabled, category, subCategory } = req.query;
         let products = [];
         let query = {};
         
@@ -58,6 +58,16 @@ const listProducts = async (req, res) => {
             // 按名称搜索
             const nameRegex = new RegExp(search, 'i');
             query.name = nameRegex;
+        }
+        
+        // 处理类别搜索
+        if (category) {
+            query.category = category;
+        }
+        
+        // 处理子类别搜索
+        if (subCategory) {
+            query.subCategory = subCategory;
         }
         
         // 默认只显示启用的产品，除非明确要求显示所有产品

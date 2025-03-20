@@ -21,7 +21,8 @@ const Orders = ({ token }) => {
       const response = await axios.post(backendUrl + '/api/order/list', {}, { headers: { token } })
       if (response.data.success) {
         console.log("管理员获取到的订单:", response.data.orders);
-        setOrders(response.data.orders.reverse())
+        const sortedOrders = response.data.orders.sort((a, b) => b.date - a.date);
+        setOrders(sortedOrders);
       } else {
         toast.error(response.data.message)
       }

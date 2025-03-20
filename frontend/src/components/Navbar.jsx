@@ -2,12 +2,14 @@ import React, { useContext, useState } from 'react'
 import {assets} from '../assets/assets'
 import { Link, NavLink } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const Navbar = () => {
 
     const [visible,setVisible] = useState(false);
 
     const {setShowSearch , getCartCount , navigate, token, setToken, setCartItems} = useContext(ShopContext);
+    const { language, toggleLanguage, t } = useLanguage();
 
     const logout = () => {
         navigate('/login')
@@ -24,19 +26,19 @@ const Navbar = () => {
       <ul className='hidden sm:flex gap-5 text-sm text-gray-700'>
         
         <NavLink to='/' className='flex flex-col items-center gap-1'>
-            <p>HOME</p>
+            <p>{t('home')}</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
         <NavLink to='/collection' className='flex flex-col items-center gap-1'>
-            <p>COLLECTION</p>
+            <p>{t('collection')}</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
         <NavLink to='/about' className='flex flex-col items-center gap-1'>
-            <p>ABOUT</p>
+            <p>{t('about')}</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
         <NavLink to='/contact' className='flex flex-col items-center gap-1'>
-            <p>CONTACT</p>
+            <p>{t('contact')}</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
 
@@ -45,15 +47,23 @@ const Navbar = () => {
       <div className='flex items-center gap-6'>
             <img onClick={()=> { setShowSearch(true); navigate('/collection') }} src={assets.search_icon} className='w-5 cursor-pointer' alt="" />
             
+            {/* Language Toggle Button */}
+            <button 
+              onClick={toggleLanguage}
+              className='px-3 py-1 text-sm border rounded hover:bg-gray-100'
+            >
+              {language === 'en' ? '中文' : 'EN'}
+            </button>
+            
             <div className='group relative'>
                 <img onClick={()=> token ? null : navigate('/login') } className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
                 {/* Dropdown Menu */}
                 {token && 
                 <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>
                     <div className='flex flex-col gap-2 w-36 py-3 px-5  bg-slate-100 text-gray-500 rounded'>
-                        <p className='cursor-pointer hover:text-black'>My Profile</p>
-                        <p onClick={()=>navigate('/orders')} className='cursor-pointer hover:text-black'>Orders</p>
-                        <p onClick={logout} className='cursor-pointer hover:text-black'>Logout</p>
+                        <p className='cursor-pointer hover:text-black'>{t('profile')}</p>
+                        <p onClick={()=>navigate('/orders')} className='cursor-pointer hover:text-black'>{t('orders')}</p>
+                        <p onClick={logout} className='cursor-pointer hover:text-black'>{t('logout')}</p>
                     </div>
                 </div>}
             </div> 

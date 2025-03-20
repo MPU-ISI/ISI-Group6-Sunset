@@ -74,7 +74,12 @@ const Cart = () => {
                   <div className='flex items-start gap-6'>
                     <img className='w-16 sm:w-20' src={productData.image[0]} alt="" />
                     <div className="flex flex-col gap-1">
-                      <p className='text-xs sm:text-lg font-medium'>{productData.name}</p>
+                      <p 
+                        className='text-xs sm:text-lg font-medium cursor-pointer hover:text-blue-600'
+                        onClick={() => navigate(`/product/${item._id}`)}
+                      >
+                        {productData.name}
+                      </p>
                       <div className='flex flex-col gap-1 mt-1'>
                         <p><span className="text-gray-500">Price:</span> {currency}{productData.price}</p>
                         <p><span className="text-gray-500">Size:</span> {item.size}</p>
