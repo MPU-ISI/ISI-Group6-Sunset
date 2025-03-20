@@ -30,7 +30,20 @@ const translations = {
     next: 'Next',
     showing: 'Showing',
     of: 'of',
-    products: 'products'
+    products: 'products',
+    back: 'Back',
+    cart: 'CART',
+    pleaseLogin: 'Please login to view your cart',
+    pleaseLoginToAddToCart: 'Please login to add items to your cart',
+    selectSize: 'Select Size',
+    addToCart: 'Add to Cart',
+    outOfStock: 'Out of Stock',
+    allSizesOutOfStock: 'All sizes are out of stock',
+    productDescription: 'Product Description',
+    reviews: 'Reviews',
+    authentic: '100% Authentic Products.',
+    cashOnDelivery: 'Cash on Delivery Available.',
+    easyReturns: 'Easy Returns within 7 Days.'
   },
   zh: {
     home: '首页',
@@ -55,7 +68,20 @@ const translations = {
     next: '下一页',
     showing: '显示',
     of: '共',
-    products: '个商品'
+    products: '个商品',
+    back: '返回',
+    cart: '购物车',
+    pleaseLogin: '请登录查看您的购物车',
+    pleaseLoginToAddToCart: '请登录后将商品添加到购物车',
+    selectSize: '选择尺码',
+    addToCart: '加入购物车',
+    outOfStock: '缺货',
+    allSizesOutOfStock: '所有尺码均已缺货',
+    productDescription: '商品描述',
+    reviews: '评价',
+    authentic: '100% 正品保证',
+    cashOnDelivery: '支持货到付款',
+    easyReturns: '7天轻松退货'
   }
 };
 

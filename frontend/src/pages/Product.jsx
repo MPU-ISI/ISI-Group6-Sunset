@@ -4,11 +4,13 @@ import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
 import { toast } from 'react-toastify';
+import { useLanguage } from '../context/LanguageContext';
 
 const Product = () => {
 
   const { productId } = useParams();
-  const { products, currency, addToCart } = useContext(ShopContext);
+  const { products, currency, addToCart, token, navigate } = useContext(ShopContext);
+  const { t } = useLanguage();
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState('')
   const [size, setSize] = useState('')
@@ -37,6 +39,13 @@ const Product = () => {
   }, [productId, products])
 
   const handleAddToCart = () => {
+    // 检查用户是否已登录
+    if (!token) {
+      toast.info(t('pleaseLoginToAddToCart'));
+      navigate('/login');
+      return;
+    }
+
     if (!size) {
       toast.error('Please select a size');
       return;
@@ -91,26 +100,26 @@ const Product = () => {
           <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
           <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
           <div className='flex flex-col gap-4 my-8'>
-              <p>Select Size</p>
+              <p>{t('selectSize')}</p>
               <div className='flex gap-2'>
                 {Object.keys(productData.sizes || {}).map((sizeOption, index) => {
                   const hasStock = checkStock(sizeOption);
                   return (
                     <button 
-                      onClick={() => hasStock ? setSize(sizeOption) : toast.error('Size is out of stock')} 
+                      onClick={() => hasStock ? setSize(sizeOption) : toast.error(t('outOfStock'))} 
                       className={`border py-2 px-4 ${hasStock ? 'bg-gray-100' : 'bg-gray-200 text-gray-500 cursor-not-allowed'} 
                         ${sizeOption === size ? 'border-orange-500' : ''}`} 
                       key={index}
                       disabled={!hasStock}
                     >
                       {sizeOption}
-                      {!hasStock && <span className="block text-xs text-red-500">Out of Stock</span>}
+                      {!hasStock && <span className="block text-xs text-red-500">{t('outOfStock')}</span>}
                     </button>
                   )
                 })}
               </div>
               {availableSizes.length === 0 && (
-                <p className="text-red-500 text-sm">All sizes are out of stock</p>
+                <p className="text-red-500 text-sm">{t('allSizesOutOfStock')}</p>
               )}
           </div>
           <button 
@@ -118,13 +127,13 @@ const Product = () => {
             className={`bg-black text-white px-8 py-3 text-sm ${availableSizes.length === 0 ? 'opacity-50 cursor-not-allowed' : 'active:bg-gray-700'}`}
             disabled={availableSizes.length === 0}
           >
-            Add to Cart
+            {t('addToCart')}
           </button>
           <hr className='mt-8 sm:w-4/5' />
           <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
-              <p>100% Authentic Products.</p>
-              <p>Cash on Delivery Available.</p>
-              <p>Easy Returns within 7 Days.</p>
+              <p>{t('authentic')}</p>
+              <p>{t('cashOnDelivery')}</p>
+              <p>{t('easyReturns')}</p>
           </div>
         </div>
       </div>
@@ -132,8 +141,8 @@ const Product = () => {
       {/* ---------- Description & Review Section ------------- */}
       <div className='mt-20'>
         <div className='flex'>
-          <b className='border px-5 py-3 text-sm'>Product Description</b>
-          <p className='border px-5 py-3 text-sm'>Reviews (122)</p>
+          <b className='border px-5 py-3 text-sm'>{t('productDescription')}</b>
+          <p className='border px-5 py-3 text-sm'>{t('reviews')} (122)</p>
         </div>
         <div className='flex flex-col gap-4 border px-6 py-6 text-sm text-gray-500'>
           <p>An e-commerce website is an online platform that facilitates the buying and selling of products or services over the internet. It serves as a virtual marketplace where businesses and individuals can showcase their products, interact with customers, and conduct transactions without the need for a physical presence. E-commerce websites have gained immense popularity due to their convenience, accessibility, and the global reach they offer.</p>

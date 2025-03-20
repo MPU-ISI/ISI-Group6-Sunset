@@ -71,6 +71,11 @@ const ShopContextProvider = (props) => {
     }
 
     const getCartCount = () => {
+        // 如果购物车为空或产品列表为空，直接返回0
+        if (Object.keys(cartItems).length === 0 || products.length === 0) {
+            return 0;
+        }
+        
         let totalCount = 0;
         for (const items in cartItems) {
             // 检查该商品是否存在于products中
