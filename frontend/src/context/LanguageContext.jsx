@@ -43,7 +43,14 @@ const translations = {
     reviews: 'Reviews',
     authentic: '100% Authentic Products.',
     cashOnDelivery: 'Cash on Delivery Available.',
-    easyReturns: 'Easy Returns within 7 Days.'
+    easyReturns: 'Easy Returns within 7 Days.',
+    yourCartIsEmpty: 'Your cart is empty',
+    continueShopping: 'Continue Shopping',
+    proceedToCheckout: 'PROCEED TO CHECKOUT',
+    price: 'Price',
+    size: 'Size',
+    quantity: 'Quantity',
+    remove: 'Remove'
   },
   zh: {
     home: '首页',
@@ -81,7 +88,14 @@ const translations = {
     reviews: '评价',
     authentic: '100% 正品保证',
     cashOnDelivery: '支持货到付款',
-    easyReturns: '7天轻松退货'
+    easyReturns: '7天轻松退货',
+    yourCartIsEmpty: '您的购物车是空的',
+    continueShopping: '继续购物',
+    proceedToCheckout: '结算',
+    price: '价格',
+    size: '尺码',
+    quantity: '数量',
+    remove: '删除'
   }
 };
 

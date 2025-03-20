@@ -111,6 +111,30 @@ const ShopContextProvider = (props) => {
         let cartData = structuredClone(cartItems);
         const currentQuantity = cartData[itemId]?.[size] || 0;
         
+        // 如果数量为0，表示删除该项目
+        if (quantity === 0) {
+            if (cartData[itemId] && cartData[itemId][size]) {
+                delete cartData[itemId][size];
+                
+                // 如果该商品没有尺码了，删除整个商品对象
+                if (Object.keys(cartData[itemId]).length === 0) {
+                    delete cartData[itemId];
+                }
+                
+                setCartItems(cartData);
+                
+                if (token) {
+                    try {
+                        await axios.post(backendUrl + '/api/cart/update', { itemId, size, quantity: 0 }, { headers: { token } });
+                    } catch (error) {
+                        console.log(error);
+                        toast.error(error.message);
+                    }
+                }
+            }
+            return;
+        }
+        
         // If decreasing quantity
         if (quantity < currentQuantity) {
             cartData[itemId][size] = quantity;
@@ -129,7 +153,7 @@ const ShopContextProvider = (props) => {
         // If increasing quantity
         else if (quantity > currentQuantity) {
             // Check if there's enough stock
-            if (!product.sizes || product.sizes[size] < (quantity - currentQuantity)) {
+            if (!product.sizes || product.sizes[size] < quantity) {
                 toast.error(`Insufficient stock. Available: ${product.sizes?.[size] || 0}`);
                 return;
             }
