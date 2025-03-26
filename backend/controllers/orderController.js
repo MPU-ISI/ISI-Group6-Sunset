@@ -304,7 +304,7 @@ const userOrders = async (req,res) => {
         
         const { userId } = req.body
 
-        const orders = await orderModel.find({ userId }).sort({ orderId: -1 })
+        const orders = await orderModel.find({ userId }).sort({ date: -1 })
         res.json({success:true,orders})
 
     } catch (error) {
@@ -328,4 +328,24 @@ const updateStatus = async (req,res) => {
     }
 }
 
-export {verifyRazorpay, verifyStripe ,placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus}
+// 获取单个订单详情
+const getOrderDetail = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+        
+        // 查找订单
+        const order = await orderModel.findById(orderId);
+        
+        if (!order) {
+            return res.json({ success: false, message: "订单不存在" });
+        }
+        
+        res.json({ success: true, order });
+        
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export {verifyRazorpay, verifyStripe, placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, getOrderDetail}

@@ -244,4 +244,101 @@ const updateProduct = async (req, res) => {
     }
 };
 
-export { listProducts, addProduct, removeProduct, singleProduct, updateProductStock, toggleProductStatus, updateProduct }
+// 更新产品图片
+const updateProductImages = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        let deleteImageIndices = req.body.deleteImageIndices;
+        
+        if (!productId) {
+            return res.json({ success: false, message: "Product ID is required" });
+        }
+        
+        const product = await productModel.findById(productId);
+        
+        if (!product) {
+            return res.json({ success: false, message: "Product not found" });
+        }
+        
+        let currentImages = [...product.image];
+        let updatedImages = [...currentImages];
+        
+        // 处理要删除的图片
+        if (deleteImageIndices) {
+            try {
+                // 尝试将JSON字符串解析为数组
+                if (typeof deleteImageIndices === 'string') {
+                    deleteImageIndices = JSON.parse(deleteImageIndices);
+                }
+                
+                // 确保deleteImageIndices是数组
+                if (!Array.isArray(deleteImageIndices)) {
+                    deleteImageIndices = [deleteImageIndices];
+                }
+                
+                if (deleteImageIndices.length > 0) {
+                    // 将索引转换为数字并排序（从大到小，以便从后往前删除）
+                    const indicesToDelete = deleteImageIndices
+                        .map(index => parseInt(index))
+                        .filter(index => !isNaN(index))
+                        .sort((a, b) => b - a);
+                    
+                    // 删除指定索引的图片
+                    for (const index of indicesToDelete) {
+                        if (index >= 0 && index < updatedImages.length) {
+                            updatedImages.splice(index, 1);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error parsing deleteImageIndices:', error);
+                // 解析失败，继续处理，不删除任何图片
+            }
+        }
+        
+        // 处理新上传的图片
+        const newImages = [];
+        if (req.files) {
+            // 获取所有上传的图片
+            for (const key in req.files) {
+                if (req.files[key] && req.files[key][0]) {
+                    newImages.push(req.files[key][0]);
+                }
+            }
+            
+            // 上传到Cloudinary并获取URL
+            if (newImages.length > 0) {
+                const newImageUrls = await Promise.all(
+                    newImages.map(async (item) => {
+                        let result = await cloudinary.uploader.upload(item.path, { resource_type: 'image' });
+                        return result.secure_url;
+                    })
+                );
+                
+                // 合并现有图片和新图片
+                updatedImages = [...updatedImages, ...newImageUrls];
+            }
+        }
+        
+        // 确保至少有一张图片
+        if (updatedImages.length === 0) {
+            return res.json({ success: false, message: "Product must have at least one image" });
+        }
+        
+        // 更新产品图片
+        product.image = updatedImages;
+        await product.save();
+        
+        return res.json({ 
+            success: true, 
+            message: "Product images updated successfully",
+            images: updatedImages
+        });
+        
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export { listProducts, addProduct, removeProduct, singleProduct, updateProductStock, toggleProductStatus, updateProduct, updateProductImages }
