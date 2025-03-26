@@ -230,6 +230,29 @@ const updateProduct = async (req, res) => {
         if (subCategory) product.subCategory = subCategory;
         if (bestseller !== undefined) product.bestseller = bestseller === "true" || bestseller === true;
         
+        // 处理图片更改
+        if (req.files) {
+            const imageUrls = [...product.image];
+            
+            // 处理删除的图片
+            for (let i = 0; i < 4; i++) {
+                if (req.body[`deleteImage${i}`] === 'true') {
+                    imageUrls[i] = null;
+                }
+            }
+            
+            // 处理更新的图片
+            for (let i = 0; i < 4; i++) {
+                if (req.files[`image${i}`] && req.files[`image${i}`][0]) {
+                    const result = await cloudinary.uploader.upload(req.files[`image${i}`][0].path, { resource_type: 'image' });
+                    imageUrls[i] = result.secure_url;
+                }
+            }
+            
+            // 过滤掉空值并更新图片数组
+            product.image = imageUrls.filter(url => url !== null);
+        }
+        
         await product.save();
         
         return res.json({ 

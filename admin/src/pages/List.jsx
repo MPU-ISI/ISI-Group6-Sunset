@@ -10,6 +10,7 @@ const List = ({ token }) => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [editingProduct, setEditingProduct] = useState(null)
   const [showDisabled, setShowDisabled] = useState(true)
+  const [imageChanges, setImageChanges] = useState({})
 
   // 使用防抖处理搜索
   useEffect(() => {
@@ -93,27 +94,71 @@ const List = ({ token }) => {
     }
   }
   
+  const handleImageChange = (index, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageChanges(prev => ({
+          ...prev,
+          [index]: {
+            file,
+            preview: reader.result
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  const removeImage = (index) => {
+    setImageChanges(prev => ({
+      ...prev,
+      [index]: {
+        file: null,
+        preview: null,
+        toDelete: true
+      }
+    }));
+  }
+
   const saveProductEdit = async () => {
     try {
       if (!editingProduct) return;
       
+      const formData = new FormData();
+      formData.append('productId', editingProduct._id);
+      formData.append('name', editingProduct.name);
+      formData.append('description', editingProduct.description);
+      formData.append('price', editingProduct.price);
+      formData.append('category', editingProduct.category);
+      formData.append('subCategory', editingProduct.subCategory);
+      formData.append('bestseller', editingProduct.bestseller);
+      
+      // 处理图片更改
+      Object.entries(imageChanges).forEach(([index, change]) => {
+        if (change.toDelete) {
+          formData.append(`deleteImage${index}`, 'true');
+        } else if (change.file) {
+          formData.append(`image${index}`, change.file);
+        }
+      });
+      
       const response = await axios.post(
         backendUrl + '/api/product/update',
+        formData,
         { 
-          productId: editingProduct._id,
-          name: editingProduct.name,
-          description: editingProduct.description,
-          price: editingProduct.price,
-          category: editingProduct.category,
-          subCategory: editingProduct.subCategory,
-          bestseller: editingProduct.bestseller
-        },
-        { headers: { token } }
+          headers: { 
+            token,
+            'Content-Type': 'multipart/form-data'
+          } 
+        }
       )
       
       if (response.data.success) {
-        toast.success('Product information updated')
+        toast.success('产品信息已更新')
         setEditingProduct(null)
+        setImageChanges({})
         await fetchList()
       } else {
         toast.error(response.data.message)
@@ -138,9 +183,67 @@ const List = ({ token }) => {
       {editingProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
-            <h2 className="text-xl font-bold mb-4">Edit Product Information</h2>
+            <h2 className="text-xl font-bold mb-4">编辑产品信息</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">产品图片</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {editingProduct.image.map((img, index) => {
+                    const imageChange = imageChanges[index];
+                    const isDeleted = imageChange?.toDelete;
+                    const preview = imageChange?.preview;
+                    
+                    if (isDeleted) return null;
+                    
+                    return (
+                      <div key={index} className="relative group">
+                        <img 
+                          src={preview || img} 
+                          alt={`Product ${index + 1}`} 
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <label className="cursor-pointer bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
+                            Change
+                            <input 
+                              type="file" 
+                              accept="image/*"
+                              onChange={(e) => handleImageChange(index, e)}
+                              className="hidden"
+                            />
+                          </label>
+                          <button
+                            onClick={() => removeImage(index)}
+                            className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {/* 添加新图片按钮 */}
+                  {editingProduct.image.length < 4 && (
+                    <div className="relative border-2 border-dashed rounded-lg h-32 flex items-center justify-center">
+                      <label className="cursor-pointer text-gray-500 hover:text-gray-700">
+                        <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span className="block text-sm mt-1">Add Image</span>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={(e) => handleImageChange(editingProduct.image.length, e)}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Product Name</label>
                 <input 
