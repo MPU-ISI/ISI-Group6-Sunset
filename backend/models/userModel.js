@@ -14,7 +14,8 @@ const userSchema = new mongoose.Schema({
         country: { type: String, default: "" },
         phone: { type: String, default: "" }
     },
-    cartData: { type: Object, default: {} }
+    cartData: { type: Object, default: {} },
+    wishlistData: { type: Object, default: {} }
 }, { minimize: false })
 
 const userModel = mongoose.models.user || mongoose.model('user',userSchema);

@@ -13,6 +13,7 @@ const ShopContextProvider = (props) => {
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
+    const [wishlistItems, setWishlistItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token, setToken] = useState('')
     const navigate = useNavigate();
@@ -239,13 +240,105 @@ const ShopContextProvider = (props) => {
         }
     }, [token])
 
+    const addToWishlist = async (itemId, size) => {
+        let wishlistData = structuredClone(wishlistItems);
+        if (wishlistData[itemId]) {
+            if (wishlistData[itemId][size]) {
+                toast.error('Item already in wishlist with this size');
+                return;
+            }
+            wishlistData[itemId][size] = 1;
+        } else {
+            wishlistData[itemId] = {};
+            wishlistData[itemId][size] = 1;
+        }
+        setWishlistItems(wishlistData);
+
+        if (token) {
+            try {
+                await axios.post(backendUrl + '/api/wishlist/add', { itemId, size }, { headers: { token } });
+                toast.success('Added to wishlist');
+            } catch (error) {
+                console.log(error);
+                toast.error(error.message);
+            }
+        }
+    }
+
+    const removeFromWishlist = async (itemId, size) => {
+        let wishlistData = structuredClone(wishlistItems);
+        if (wishlistData[itemId] && wishlistData[itemId][size]) {
+            delete wishlistData[itemId][size];
+            if (Object.keys(wishlistData[itemId]).length === 0) {
+                delete wishlistData[itemId];
+            }
+            setWishlistItems(wishlistData);
+
+            if (token) {
+                try {
+                    await axios.post(backendUrl + '/api/wishlist/remove', { itemId, size }, { headers: { token } });
+                    toast.success('Removed from wishlist');
+                } catch (error) {
+                    console.log(error);
+                    toast.error(error.message);
+                }
+            }
+        }
+    }
+
+    const clearWishlist = async () => {
+        if (!window.confirm('Are you sure you want to clear your wishlist?')) return;
+        
+        setWishlistItems({});
+
+        if (token) {
+            try {
+                await axios.post(backendUrl + '/api/wishlist/clear', {}, { headers: { token } });
+                toast.success('Wishlist cleared');
+            } catch (error) {
+                console.log(error);
+                toast.error(error.message);
+            }
+        }
+    }
+
+    const getUserWishlist = async (token) => {
+        try {
+            const response = await axios.post(backendUrl + '/api/wishlist/get', {}, { headers: { token } });
+            if (response.data.success) {
+                setWishlistItems(response.data.wishlistData);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const isInWishlist = (itemId, size) => {
+        return wishlistItems[itemId]?.[size] ? true : false;
+    }
+
+    const getWishlistCount = () => {
+        let count = 0;
+        for (const itemId in wishlistItems) {
+            count += Object.keys(wishlistItems[itemId]).length;
+        }
+        return count;
+    }
+
     const value = {
         products, currency, delivery_fee,
         search, setSearch, showSearch, setShowSearch,
         cartItems, addToCart,setCartItems,
         getCartCount, updateQuantity,
         getCartAmount, navigate, backendUrl,
-        setToken, token
+        setToken, token,
+        wishlistItems,
+        addToWishlist,
+        removeFromWishlist,
+        clearWishlist,
+        getUserWishlist,
+        isInWishlist,
+        getWishlistCount
     }
 
     return (

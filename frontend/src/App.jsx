@@ -10,6 +10,7 @@ import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
 import Orders from './pages/Orders'
 import OrderDetail from './pages/OrderDetail'
+import Wishlist from './pages/Wishlist'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
@@ -37,6 +38,7 @@ const App = () => {
           <Route path='/orders' element={<Orders />} />
           <Route path='/order/:orderId' element={<OrderDetail />} />
           <Route path='/verify' element={<Verify />} />
+          <Route path='/wishlist' element={<Wishlist />} />
         </Routes>
         <Footer />
       </div>

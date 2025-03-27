@@ -3,12 +3,13 @@ import {assets} from '../assets/assets'
 import { Link, NavLink } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
 import { useLanguage } from '../context/LanguageContext';
+import { FaHeart } from 'react-icons/fa';
 
 const Navbar = () => {
 
     const [visible,setVisible] = useState(false);
 
-    const {setShowSearch , getCartCount , navigate, token, setToken, setCartItems} = useContext(ShopContext);
+    const {setShowSearch , getCartCount, getWishlistCount, navigate, token, setToken, setCartItems} = useContext(ShopContext);
     const { language, toggleLanguage, t } = useLanguage();
 
     const logout = () => {
@@ -63,17 +64,38 @@ const Navbar = () => {
                     <div className='flex flex-col gap-2 w-36 py-3 px-5  bg-slate-100 text-gray-500 rounded'>
                         <p className='cursor-pointer hover:text-black'>{t('profile')}</p>
                         <p onClick={()=>navigate('/orders')} className='cursor-pointer hover:text-black'>{t('orders')}</p>
+                        <p onClick={()=>navigate('/wishlist')} className='cursor-pointer hover:text-black'>{t('wishlist')}</p>
                         <p onClick={logout} className='cursor-pointer hover:text-black'>{t('logout')}</p>
                     </div>
                 </div>}
             </div> 
+
+            {/* Wishlist Icon */}
+            <div 
+              onClick={() => token ? navigate('/wishlist') : navigate('/login')}
+              className='relative cursor-pointer'
+            >
+                <FaHeart className="text-gray-500 hover:text-red-500 w-5 h-5" />
+                {getWishlistCount() > 0 && (
+                    <div className='absolute right-[-5px] bottom-[-5px] w-4 h-4 bg-black text-white text-[8px] rounded-full flex items-center justify-center'>
+                        {getWishlistCount()}
+                    </div>
+                )}
+            </div>
+
+            {/* Cart Icon */}
             <div 
               onClick={() => token ? navigate('/cart') : navigate('/login')}
               className='relative cursor-pointer'
             >
                 <img src={assets.cart_icon} className='w-5 min-w-5' alt="" />
-                <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]'>{getCartCount()}</p>
+                {getCartCount() > 0 && (
+                    <div className='absolute right-[-5px] bottom-[-5px] w-4 h-4 bg-black text-white text-[8px] rounded-full flex items-center justify-center'>
+                        {getCartCount()}
+                    </div>
+                )}
             </div>
+
             <img onClick={()=>setVisible(true)} src={assets.menu_icon} className='w-5 cursor-pointer sm:hidden' alt="" /> 
       </div>
 
@@ -91,15 +113,32 @@ const Navbar = () => {
                     <div 
                         onClick={()=> {
                             setVisible(false);
+                            token ? navigate('/wishlist') : navigate('/login');
+                        }} 
+                        className='py-2 pl-6 border cursor-pointer flex items-center gap-2'
+                    >
+                        <FaHeart className="text-gray-500 w-4 h-4" />
+                        <span>{t('wishlist')}</span>
+                        {getWishlistCount() > 0 && (
+                            <span className='ml-1 bg-black text-white w-4 h-4 text-center rounded-full text-xs'>
+                                {getWishlistCount()}
+                            </span>
+                        )}
+                    </div>
+                    <div 
+                        onClick={()=> {
+                            setVisible(false);
                             token ? navigate('/cart') : navigate('/login');
                         }} 
                         className='py-2 pl-6 border cursor-pointer flex items-center gap-2'
                     >
                         <img src={assets.cart_icon} className='w-4' alt="" />
-                        <span>{language === 'en' ? 'CART' : '购物车'}</span>
-                        <span className='ml-1 bg-black text-white w-4 h-4 text-center rounded-full text-xs'>
-                            {getCartCount()}
-                        </span>
+                        <span>{t('cart')}</span>
+                        {getCartCount() > 0 && (
+                            <span className='ml-1 bg-black text-white w-4 h-4 text-center rounded-full text-xs'>
+                                {getCartCount()}
+                            </span>
+                        )}
                     </div>
                 </div>
         </div>
