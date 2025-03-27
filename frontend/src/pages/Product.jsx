@@ -5,6 +5,7 @@ import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
 import { toast } from 'react-toastify';
 import { useLanguage } from '../context/LanguageContext';
+import WishlistIcon from '../components/WishlistIcon';
 
 const Product = () => {
 
@@ -81,8 +82,11 @@ const Product = () => {
                 ))
               }
           </div>
-          <div className='w-full sm:w-[80%]'>
+          <div className='w-full sm:w-[80%] relative'>
               <img className='w-full h-auto' src={image} alt="" />
+              <div className="absolute top-4 right-4">
+                <WishlistIcon productId={productData._id} token={token} showSizeSelector={true} productSizes={productData.sizes} size={size} />
+              </div>
           </div>
         </div>
 
@@ -122,13 +126,28 @@ const Product = () => {
                 <p className="text-red-500 text-sm">{t('allSizesOutOfStock')}</p>
               )}
           </div>
-          <button 
-            onClick={handleAddToCart} 
-            className={`bg-black text-white px-8 py-3 text-sm ${availableSizes.length === 0 ? 'opacity-50 cursor-not-allowed' : 'active:bg-gray-700'}`}
-            disabled={availableSizes.length === 0}
-          >
-            {t('addToCart')}
-          </button>
+          <div className="flex gap-4 items-center">
+            <button 
+              onClick={handleAddToCart} 
+              className={`bg-black text-white px-8 py-3 text-sm ${availableSizes.length === 0 ? 'opacity-50 cursor-not-allowed' : 'active:bg-gray-700'}`}
+              disabled={availableSizes.length === 0}
+            >
+              {t('addToCart')}
+            </button>
+            <div className="flex items-center">
+              <div className="border border-gray-300 p-2 rounded">
+                <WishlistIcon 
+                  productId={productData._id} 
+                  token={token} 
+                  showSizeSelector={true}
+                  productSizes={productData.sizes}
+                  size={size}
+                />
+              </div>
+              <span className="ml-2 text-sm text-gray-600">Add to Wishlist</span>
+            </div>
+          </div>
+
           <hr className='mt-8 sm:w-4/5' />
           <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
               <p>{t('authentic')}</p>

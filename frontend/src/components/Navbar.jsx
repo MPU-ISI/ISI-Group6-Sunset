@@ -63,10 +63,20 @@ const Navbar = () => {
                     <div className='flex flex-col gap-2 w-36 py-3 px-5  bg-slate-100 text-gray-500 rounded'>
                         <p className='cursor-pointer hover:text-black'>{t('profile')}</p>
                         <p onClick={()=>navigate('/orders')} className='cursor-pointer hover:text-black'>{t('orders')}</p>
+                        <p onClick={()=>navigate('/wishlist')} className='cursor-pointer hover:text-black'>Wishlist</p>
                         <p onClick={logout} className='cursor-pointer hover:text-black'>{t('logout')}</p>
                     </div>
                 </div>}
             </div> 
+            <Link 
+              to={token ? '/wishlist' : '/login'}
+              className='relative cursor-pointer'
+              title="Wishlist"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+            </Link>
             <div 
               onClick={() => token ? navigate('/cart') : navigate('/login')}
               className='relative cursor-pointer'
@@ -88,6 +98,7 @@ const Navbar = () => {
                     <NavLink onClick={()=>setVisible(false)} className='py-2 pl-6 border' to='/collection'>{t('collection')}</NavLink>
                     <NavLink onClick={()=>setVisible(false)} className='py-2 pl-6 border' to='/about'>{t('about')}</NavLink>
                     <NavLink onClick={()=>setVisible(false)} className='py-2 pl-6 border' to='/contact'>{t('contact')}</NavLink>
+                    <NavLink onClick={()=>setVisible(false)} className='py-2 pl-6 border' to={token ? '/wishlist' : '/login'}>Wishlist</NavLink>
                     <div 
                         onClick={()=> {
                             setVisible(false);
