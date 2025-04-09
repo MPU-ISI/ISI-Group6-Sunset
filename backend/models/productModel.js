@@ -14,7 +14,12 @@ const productSchema = new mongoose.Schema({
     },
     bestseller: { type: Boolean },
     enabled: { type: Boolean, default: true },
-    date: { type: Number, required: true }
+    date: { type: Number, required: true },
+    // 促销相关字段
+    isOnPromotion: { type: Boolean, default: false },
+    promotionPrice: { type: Number },
+    promotionStartDate: { type: Date },
+    promotionEndDate: { type: Date }
 })
 
 const productModel  = mongoose.models.product || mongoose.model("product",productSchema);

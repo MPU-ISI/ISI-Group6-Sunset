@@ -111,6 +111,12 @@ const List = ({ token }) => {
     try {
       if (!editingProduct) return;
       
+      // 验证促销价格
+      if (editingProduct.isOnPromotion && (!editingProduct.promotionPrice || editingProduct.promotionPrice >= editingProduct.price)) {
+        toast.error('Promotion price must lower than original price');
+        return;
+      }
+      
       const response = await axios.post(
         backendUrl + '/api/product/update',
         { 
@@ -120,7 +126,12 @@ const List = ({ token }) => {
           price: editingProduct.price,
           category: editingProduct.category,
           subCategory: editingProduct.subCategory,
-          bestseller: editingProduct.bestseller
+          bestseller: editingProduct.bestseller,
+          // 添加促销相关字段
+          isOnPromotion: editingProduct.isOnPromotion,
+          promotionPrice: editingProduct.promotionPrice,
+          promotionStartDate: editingProduct.promotionStartDate,
+          promotionEndDate: editingProduct.promotionEndDate
         },
         { headers: { token } }
       )
@@ -288,6 +299,65 @@ const List = ({ token }) => {
                 />
               </div>
               
+              {/* 促销设置区域 */}
+              <div className="md:col-span-2 border-t pt-3 mt-2">
+                <h3 className="font-medium mb-3">Promotion Settings</h3>
+                
+                <div className="flex items-center mb-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={editingProduct.isOnPromotion || false} 
+                      onChange={(e) => handleEditChange('isOnPromotion', e.target.checked)}
+                      className="mr-2"
+                    />
+                    <span>Set as promotion product</span>
+                  </label>
+                </div>
+                
+                {editingProduct.isOnPromotion && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Promotion Price</label>
+                      <input 
+                        type="number" 
+                        value={editingProduct.promotionPrice || ''} 
+                        onChange={(e) => handleEditChange('promotionPrice', e.target.value)}
+                        className="w-full border rounded px-3 py-2"
+                      />
+                      {editingProduct.promotionPrice && editingProduct.price && 
+                        editingProduct.promotionPrice < editingProduct.price && (
+                          <div className="text-xs text-green-600 mt-1">
+                            Save: ${(editingProduct.price - editingProduct.promotionPrice).toFixed(2)} 
+                            ({(((editingProduct.price - editingProduct.promotionPrice) / editingProduct.price) * 100).toFixed()}% Discount)
+                          </div>
+                        )
+                      }
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Promotion Start Date</label>
+                      <input 
+                        type="datetime-local" 
+                        value={editingProduct.promotionStartDate ? new Date(editingProduct.promotionStartDate).toISOString().slice(0, 16) : ''}
+                        onChange={(e) => handleEditChange('promotionStartDate', e.target.value)}
+                        className="w-full border rounded px-3 py-2"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Promotion End Date</label>
+                      <input 
+                        type="datetime-local" 
+                        value={editingProduct.promotionEndDate ? new Date(editingProduct.promotionEndDate).toISOString().slice(0, 16) : ''} 
+                        onChange={(e) => handleEditChange('promotionEndDate', e.target.value)}
+                        className="w-full border rounded px-3 py-2"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              
               <div>
                 <label className="flex items-center">
                   <input 
@@ -437,7 +507,7 @@ const List = ({ token }) => {
           <b>Name</b>
           <b>Category</b>
           <b>Price</b>
-          <b>Stock</b>
+          <b>Stock/Promo</b>
           <b className='text-center'>Action</b>
         </div>
 
@@ -464,7 +534,12 @@ const List = ({ token }) => {
                 <p className="text-xs text-gray-500">ID: {item._id}</p>
               </div>
               <p>{item.category}</p>
-              <p>{currency}{item.price}</p>
+              <div>
+                <p>{currency}{item.price}</p>
+                {item.isOnPromotion && item.promotionPrice && (
+                  <p className="text-xs text-red-600 font-medium">{currency}{item.promotionPrice}</p>
+                )}
+              </div>
               <div className='flex flex-col gap-1'>
                 {Object.entries(item.sizes).map(([size, quantity]) => (
                   <div key={size} className='flex items-center gap-2'>
@@ -500,6 +575,17 @@ const List = ({ token }) => {
                     )}
                   </div>
                 ))}
+                {/* 显示促销信息 */}
+                {item.isOnPromotion && item.promotionPrice && (
+                  <div className="mt-1 text-xs text-red-600 font-medium">
+                    促销价: {currency}{item.promotionPrice}
+                    <div>
+                      {item.promotionEndDate && (
+                        <span>截止: {new Date(item.promotionEndDate).toLocaleDateString()}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className='flex justify-end gap-2'>
                 <button 

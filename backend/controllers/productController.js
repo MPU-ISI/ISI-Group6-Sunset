@@ -5,7 +5,7 @@ import productModel from "../models/productModel.js"
 const addProduct = async (req, res) => {
     try {
 
-        const { name, description, price, category, subCategory, sizes, bestseller } = req.body
+        const { name, description, price, category, subCategory, sizes, bestseller, isOnPromotion, promotionPrice, promotionStartDate, promotionEndDate } = req.body
 
         const image1 = req.files.image1 && req.files.image1[0]
         const image2 = req.files.image2 && req.files.image2[0]
@@ -30,7 +30,11 @@ const addProduct = async (req, res) => {
             bestseller: bestseller === "true" ? true : false,
             sizes: JSON.parse(sizes),
             image: imagesUrl,
-            date: Date.now()
+            date: Date.now(),
+            isOnPromotion: isOnPromotion === "true" ? true : false,
+            promotionPrice: promotionPrice ? Number(promotionPrice) : null,
+            promotionStartDate: promotionStartDate ? new Date(promotionStartDate) : null,
+            promotionEndDate: promotionEndDate ? new Date(promotionEndDate) : null
         }
 
         console.log(productData);
@@ -210,7 +214,19 @@ const toggleProductStatus = async (req, res) => {
 // 更新产品信息
 const updateProduct = async (req, res) => {
     try {
-        const { productId, name, description, price, category, subCategory, bestseller } = req.body;
+        const { 
+            productId, 
+            name, 
+            description, 
+            price, 
+            category, 
+            subCategory, 
+            bestseller,
+            isOnPromotion,
+            promotionPrice,
+            promotionStartDate,
+            promotionEndDate
+        } = req.body;
         
         if (!productId) {
             return res.json({ success: false, message: "产品ID不能为空" });
@@ -229,6 +245,12 @@ const updateProduct = async (req, res) => {
         if (category) product.category = category;
         if (subCategory) product.subCategory = subCategory;
         if (bestseller !== undefined) product.bestseller = bestseller === "true" || bestseller === true;
+        
+        // 更新促销信息
+        if (isOnPromotion !== undefined) product.isOnPromotion = isOnPromotion === "true" || isOnPromotion === true;
+        if (promotionPrice !== undefined) product.promotionPrice = promotionPrice ? Number(promotionPrice) : null;
+        if (promotionStartDate !== undefined) product.promotionStartDate = promotionStartDate ? new Date(promotionStartDate) : null;
+        if (promotionEndDate !== undefined) product.promotionEndDate = promotionEndDate ? new Date(promotionEndDate) : null;
         
         await product.save();
         
@@ -341,4 +363,96 @@ const updateProductImages = async (req, res) => {
     }
 };
 
-export { listProducts, addProduct, removeProduct, singleProduct, updateProductStock, toggleProductStatus, updateProduct, updateProductImages }
+// 管理产品促销状态
+const managePromotion = async (req, res) => {
+    try {
+        const { productId, isOnPromotion, promotionPrice, promotionStartDate, promotionEndDate } = req.body;
+        
+        if (!productId) {
+            return res.json({ success: false, message: "产品ID不能为空" });
+        }
+        
+        const product = await productModel.findById(productId);
+        
+        if (!product) {
+            return res.json({ success: false, message: "产品不存在" });
+        }
+        
+        // 更新促销信息
+        if (isOnPromotion !== undefined) {
+            product.isOnPromotion = isOnPromotion === "true" || isOnPromotion === true;
+        }
+        
+        if (promotionPrice !== undefined) {
+            product.promotionPrice = promotionPrice ? Number(promotionPrice) : null;
+        }
+        
+        if (promotionStartDate !== undefined) {
+            product.promotionStartDate = promotionStartDate ? new Date(promotionStartDate) : null;
+        }
+        
+        if (promotionEndDate !== undefined) {
+            product.promotionEndDate = promotionEndDate ? new Date(promotionEndDate) : null;
+        }
+        
+        // 清除已过期的促销
+        const now = new Date();
+        if (product.promotionEndDate && product.promotionEndDate < now) {
+            product.isOnPromotion = false;
+        }
+        
+        await product.save();
+        
+        return res.json({ 
+            success: true, 
+            message: product.isOnPromotion ? "促销已设置" : "促销已取消",
+            product
+        });
+        
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+// 清理过期促销的函数
+const clearExpiredPromotions = async (req, res) => {
+    try {
+        const now = new Date();
+        
+        // 找到所有过期的促销产品
+        const expiredPromotions = await productModel.find({
+            isOnPromotion: true,
+            promotionEndDate: { $lt: now }
+        });
+        
+        // 更新每个过期的促销产品
+        for (const product of expiredPromotions) {
+            product.isOnPromotion = false;
+            await product.save();
+        }
+        
+        return res.json({
+            success: true, 
+            message: `已清理 ${expiredPromotions.length} 个过期促销`,
+            count: expiredPromotions.length
+        });
+        
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export { 
+    listProducts, 
+    addProduct, 
+    removeProduct, 
+    singleProduct, 
+    updateProductStock, 
+    toggleProductStatus, 
+    updateProduct, 
+    updateProductImages,
+    managePromotion,
+    clearExpiredPromotions 
+}

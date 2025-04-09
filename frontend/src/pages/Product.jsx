@@ -109,7 +109,17 @@ const Product = () => {
             <img src={assets.star_dull_icon} alt="" className="w-3 5" />
             <p className='pl-2'>(122)</p>
           </div>
-          <p className='text-xl font-medium mb-6'>${productData.price}</p>
+          <div className='mb-6'>
+            {productData.isOnPromotion && productData.promotionPrice ? (
+              <div className='flex items-center gap-3'>
+                <p className='text-xl font-medium text-red-600'>${productData.promotionPrice}</p>
+                <p className='text-lg line-through text-gray-500'>${productData.price}</p>
+                <span className='bg-red-500 text-white text-xs px-2 py-1 rounded-md'>{t('onSale')}</span>
+              </div>
+            ) : (
+              <p className='text-xl font-medium'>${productData.price}</p>
+            )}
+          </div>
           <p className='text-gray-500 md:w-4/5 mb-8'>{productData.description}</p>
           
           <div className='mb-6'>
