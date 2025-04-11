@@ -58,3 +58,31 @@ html[data-font-size="medium"] {
 html[data-font-size="large"] {
   font-size: 20px;
 }
+
+.promo-price {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.9em;
+}
+
+.current-price {
+  color: #e53935;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.savings {
+  color: #4caf50;
+  font-size: 0.9em;
+}
+
+.price {
+  font-weight: bold;
+  font-size: 1.2em;
+}

@@ -53,65 +53,43 @@ const addProduct = async (req, res) => {
 // function for list product
 const listProducts = async (req, res) => {
     try {
-        const { search, showDisabled, category, subCategory } = req.query;
-        let products = [];
-        let query = {};
+        const { search, showDisabled } = req.query;
         
-        // 处理搜索条件
-        if (search) {
-            // 按名称搜索
-            const nameRegex = new RegExp(search, 'i');
-            query.name = nameRegex;
-        }
+        // 自动清理过期促销
+        const now = new Date();
+        await productModel.updateMany(
+            { isOnPromotion: true, promotionEndDate: { $lt: now } },
+            { $set: { isOnPromotion: false } }
+        );
         
-        // 处理类别搜索
-        if (category) {
-            query.category = category;
-        }
+        // 构建查询条件
+        const query = {};
         
-        // 处理子类别搜索
-        if (subCategory) {
-            query.subCategory = subCategory;
-        }
-        
-        // 默认只显示启用的产品，除非明确要求显示所有产品
+        // 如果不显示已禁用商品，则添加启用条件
         if (showDisabled !== 'true') {
-            query.enabled = { $ne: false };
+            query.enabled = true;
         }
         
-        // 获取产品列表
-        products = await productModel.find(query);
-        
-        // 如果是搜索ID，需要额外处理
+        // 如果有搜索词，则添加模糊搜索条件
         if (search) {
-            // 获取所有产品进行ID搜索
-            const allProducts = await productModel.find({ _id: { $exists: true } });
-            const productsByIdSubstring = allProducts.filter(product => 
-                product._id.toString().includes(search)
-            );
-            
-            // 如果不显示禁用产品，过滤掉禁用的产品
-            const filteredByIdProducts = showDisabled === 'true' 
-                ? productsByIdSubstring 
-                : productsByIdSubstring.filter(p => p.enabled !== false);
-            
-            // 合并结果并去重
-            const mergedProducts = [...products];
-            
-            // 添加ID匹配的产品（如果不重复）
-            filteredByIdProducts.forEach(product => {
-                if (!mergedProducts.some(p => p._id.toString() === product._id.toString())) {
-                    mergedProducts.push(product);
-                }
-            });
-            
-            products = mergedProducts;
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } }, // 名称模糊匹配
+                { description: { $regex: search, $options: 'i' } }, // 描述模糊匹配
+                { _id: search.length === 24 ? search : null } // 如果长度为24，可能是MongoDB ID
+            ];
         }
         
-        res.json({success: true, products});
+        // 获取所有产品
+        const products = await productModel.find(query);
+        
+        return res.json({
+            success: true,
+            products
+        });
+        
     } catch (error) {
         console.log(error);
-        res.json({success: false, message: error.message});
+        res.json({ success: false, message: error.message });
     }
 }
 

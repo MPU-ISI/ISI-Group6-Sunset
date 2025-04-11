@@ -79,7 +79,19 @@ const Wishlist = () => {
                             />
                             <div className="p-4">
                                 <h3 className="font-medium mb-2">{product.name}</h3>
-                                <p className="text-gray-600 mb-2">${product.price}</p>
+                                <div className="item-price">
+                                    {product.isOnPromotion && product.promotionPrice && product.promotionPrice < product.price ? (
+                                        <div className="promo-price">
+                                            <span className="original-price">${product.price}</span>
+                                            <span className="current-price">${product.promotionPrice}</span>
+                                            <span className="savings">
+                                                Save ${(product.price - product.promotionPrice).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span className="price">${product.price}</span>
+                                    )}
+                                </div>
                                 <div className="flex items-center gap-2 mb-4">
                                     <span className="text-sm text-gray-500">{t('size')}:</span>
                                     <span className="font-medium">{product.selectedSize}</span>

@@ -186,7 +186,11 @@ const ShopContextProvider = (props) => {
                         // 检查该尺码是否有库存
                         const sizeAvailable = itemInfo.sizes && itemInfo.sizes[item] > 0;
                         if (sizeAvailable) {
-                            totalAmount += itemInfo.price * cartItems[items][item];
+                            // 使用促销价格(如果有)或原价
+                            const price = (itemInfo.isOnPromotion && itemInfo.promotionPrice && itemInfo.promotionPrice < itemInfo.price) 
+                                ? itemInfo.promotionPrice 
+                                : itemInfo.price;
+                            totalAmount += price * cartItems[items][item];
                         }
                     }
                 } catch (error) {
@@ -199,14 +203,16 @@ const ShopContextProvider = (props) => {
 
     const getProductsData = async () => {
         try {
-
             const response = await axios.get(backendUrl + '/api/product/list')
             if (response.data.success) {
                 setProducts(response.data.products.reverse())
+                // 获取产品后立即检查促销状态
+                setTimeout(() => {
+                    checkPromotionDates();
+                }, 100);
             } else {
                 toast.error(response.data.message)
             }
-
         } catch (error) {
             console.log(error)
             toast.error(error.message)
@@ -228,7 +234,36 @@ const ShopContextProvider = (props) => {
 
     useEffect(() => {
         getProductsData()
+        
+        // 设置定时器，每小时检查一次促销状态
+        const promotionCheckInterval = setInterval(() => {
+            checkPromotionDates();
+        }, 60 * 60 * 1000); // 每小时检查一次
+        
+        return () => clearInterval(promotionCheckInterval);
     }, [])
+    
+    // 检查促销是否过期并更新本地状态
+    const checkPromotionDates = () => {
+        const now = new Date();
+        const updatedProducts = products.map(product => {
+            // 如果产品当前是促销状态且促销结束日期已过，则取消促销状态
+            if (product.isOnPromotion && product.promotionEndDate && new Date(product.promotionEndDate) < now) {
+                return { ...product, isOnPromotion: false };
+            }
+            // 如果产品当前不是促销状态但促销开始日期已到且结束日期未到，则激活促销状态
+            if (!product.isOnPromotion && product.promotionStartDate && product.promotionEndDate && 
+                new Date(product.promotionStartDate) <= now && new Date(product.promotionEndDate) > now) {
+                return { ...product, isOnPromotion: true };
+            }
+            return product;
+        });
+        
+        // 只有在有变化时才更新状态
+        if (JSON.stringify(updatedProducts) !== JSON.stringify(products)) {
+            setProducts(updatedProducts);
+        }
+    };
 
     useEffect(() => {
         if (!token && localStorage.getItem('token')) {

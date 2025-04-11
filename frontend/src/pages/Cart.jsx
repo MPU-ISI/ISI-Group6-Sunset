@@ -108,7 +108,19 @@ const Cart = () => {
                         {productData.name}
                       </p>
                       <div className='flex flex-col gap-1 mt-1'>
-                        <p><span className="text-gray-500">{t('price')}:</span> {currency}{productData.price}</p>
+                        <div className="item-price">
+                          {productData.isOnPromotion && productData.promotionPrice && productData.promotionPrice < productData.price ? (
+                            <div className="promo-price">
+                              <span className="original-price">{currency}{productData.price}</span>
+                              <span className="current-price">{currency}{productData.promotionPrice}</span>
+                              <span className="savings">
+                                Save {currency}{(productData.price - productData.promotionPrice).toFixed(2)}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="price">{currency}{productData.price}</span>
+                          )}
+                        </div>
                         <p><span className="text-gray-500">{t('size')}:</span> {item.size}</p>
                         <p><span className="text-gray-500">{t('quantity')}:</span> {item.quantity}</p>
                       </div>
