@@ -578,10 +578,10 @@ const List = ({ token }) => {
                 {/* 显示促销信息 */}
                 {item.isOnPromotion && item.promotionPrice && (
                   <div className="mt-1 text-xs text-red-600 font-medium">
-                    促销价: {currency}{item.promotionPrice}
+                    Promotion price: {currency}{item.promotionPrice}
                     <div>
                       {item.promotionEndDate && (
-                        <span>截止: {new Date(item.promotionEndDate).toLocaleDateString()}</span>
+                        <span>End date: {new Date(item.promotionEndDate).toLocaleDateString()}</span>
                       )}
                     </div>
                   </div>
