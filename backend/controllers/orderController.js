@@ -348,4 +348,39 @@ const getOrderDetail = async (req, res) => {
     }
 };
 
-export {verifyRazorpay, verifyStripe, placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, getOrderDetail}
+// Get sales data for Week's Winner
+const getSalesData = async (req, res) => {
+    try {
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        
+        // 获取最近一周的订单
+        const recentOrders = await orderModel.find({
+            date: { $gte: oneWeekAgo },
+            status: { $ne: 'Cancelled' }, // 排除已取消的订单
+            payment: true // 只统计已支付的订单
+        });
+
+        // 计算每个商品的销售数量
+        const salesData = {};
+        recentOrders.forEach(order => {
+            if (order.items && Array.isArray(order.items)) {
+                order.items.forEach(item => {
+                    if (item && item._id) {
+                        if (!salesData[item._id]) {
+                            salesData[item._id] = 0;
+                        }
+                        salesData[item._id] += item.quantity || 0;
+                    }
+                });
+            }
+        });
+
+        console.log('Sales data calculated:', Object.keys(salesData).length, 'products');
+        res.json({ success: true, salesData });
+    } catch (error) {
+        console.error('Error getting sales data:', error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export {verifyRazorpay, verifyStripe, placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, getOrderDetail, getSalesData}

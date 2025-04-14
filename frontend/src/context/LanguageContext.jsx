@@ -97,7 +97,9 @@ const translations = {
     itemAddedToWishlist: 'Added to wishlist',
     itemRemovedFromWishlist: 'Removed from wishlist',
     wishlistCleared: 'Wishlist cleared',
-    addToCartFromWishlist: 'Add to Cart'
+    addToCartFromWishlist: 'Add to Cart',
+    weeksWinners: "Week's Winners",
+    sale: "Sale"
   },
   zh: {
     home: '首页',
@@ -189,7 +191,9 @@ const translations = {
     itemAddedToWishlist: '已添加到愿望单',
     itemRemovedFromWishlist: '已从愿望单移除',
     wishlistCleared: '愿望单已清空',
-    addToCartFromWishlist: '加入购物车'
+    addToCartFromWishlist: '加入购物车',
+    weeksWinners: "本周热销",
+    sale: "促销"
   }
 };
 

@@ -16,6 +16,8 @@ const ShopContextProvider = (props) => {
     const [wishlistItems, setWishlistItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token, setToken] = useState('')
+    const [weeksWinners, setWeeksWinners] = useState([]);
+    const [salesData, setSalesData] = useState({});
     const navigate = useNavigate();
 
 
@@ -205,17 +207,20 @@ const ShopContextProvider = (props) => {
         try {
             const response = await axios.get(backendUrl + '/api/product/list')
             if (response.data.success) {
-                setProducts(response.data.products.reverse())
-                // 获取产品后立即检查促销状态
-                setTimeout(() => {
-                    checkPromotionDates();
-                }, 100);
+                const productsData = response.data.products.reverse();
+                setProducts(productsData);
+                console.log('Products loaded:', productsData.length);
+                // 获取产品后立即检查促销状态并更新Week's Winners
+                checkPromotionDates();
+                return productsData; // 返回加载的产品数据
             } else {
-                toast.error(response.data.message)
+                toast.error(response.data.message);
+                return [];
             }
         } catch (error) {
-            console.log(error)
-            toast.error(error.message)
+            console.log(error);
+            toast.error(error.message);
+            return [];
         }
     }
 
@@ -233,16 +238,39 @@ const ShopContextProvider = (props) => {
     }
 
     useEffect(() => {
-        getProductsData()
+        const initializeData = async () => {
+            try {
+                // 先获取产品数据
+                const productsData = await getProductsData();
+                console.log('Initial products loaded:', productsData.length);
+                
+                // 使用获取到的产品数据来获取销售数据和更新Week's Winners
+                if (productsData && productsData.length > 0) {
+                    await fetchSalesData(productsData);
+                }
+            } catch (error) {
+                console.error('Error initializing data:', error);
+            }
+        };
+        
+        initializeData();
         
         // 设置定时器，每小时检查一次促销状态
         const promotionCheckInterval = setInterval(() => {
             checkPromotionDates();
-        }, 60 * 60 * 1000); // 每小时检查一次
+        }, 60 * 60 * 1000);
+
+        // 设置定时器，每分钟更新一次Week's Winners
+        const winnersUpdateInterval = setInterval(() => {
+            fetchSalesData();
+        }, 60 * 1000);
         
-        return () => clearInterval(promotionCheckInterval);
-    }, [])
-    
+        return () => {
+            clearInterval(promotionCheckInterval);
+            clearInterval(winnersUpdateInterval);
+        };
+    }, []);
+
     // 检查促销是否过期并更新本地状态
     const checkPromotionDates = () => {
         const now = new Date();
@@ -360,6 +388,127 @@ const ShopContextProvider = (props) => {
         return count;
     }
 
+    // 获取销售数据
+    const fetchSalesData = async (currentProducts) => {
+        const productsToUse = currentProducts || products;
+        if (!productsToUse || productsToUse.length === 0) {
+            console.log('No products available for fetching sales data');
+            return;
+        }
+
+        try {
+            const response = await axios.get(`${backendUrl}/api/order/sales-data`);
+            if (response.data.success) {
+                const newSalesData = response.data.salesData || {};
+                setSalesData(newSalesData);
+                console.log('Sales data loaded:', Object.keys(newSalesData).length);
+                // 使用当前的产品数据更新Week's Winners
+                updateWeeksWinners(productsToUse, newSalesData);
+            } else {
+                console.error('Failed to fetch sales data:', response.data.message);
+                updateWeeksWinners(productsToUse, {});
+            }
+        } catch (error) {
+            console.error('Error fetching sales data:', error);
+            updateWeeksWinners(productsToUse, {});
+        }
+    };
+
+    // 更新Week's Winners
+    const updateWeeksWinners = (currentProducts, currentSalesData) => {
+        const productsToUse = currentProducts || products;
+        const salesDataToUse = currentSalesData || salesData;
+
+        if (!productsToUse || productsToUse.length === 0) {
+            console.log('No products available for Week\'s Winners');
+            return;
+        }
+        
+        try {
+            // 为所有产品计算得分
+            const productScores = productsToUse
+                .filter(product => product.isActive !== false) // 只包含激活的产品
+                .map(product => ({
+                    product,
+                    score: calculateProductScore(product, salesDataToUse)
+                }))
+                .sort((a, b) => b.score - a.score); // 按得分排序
+            
+            // 获取所有可用的产品
+            const availableProducts = productScores.map(item => item.product);
+            
+            if (availableProducts.length === 0) {
+                console.log('No available products after filtering');
+                return;
+            }
+            
+            // 创建winners数组，确保始终有5个产品
+            const winners = [];
+            for (let i = 0; i < 5 && i < availableProducts.length; i++) {
+                winners.push(availableProducts[i]);
+            }
+
+            // 如果产品不足5个，循环使用已有产品
+            while (winners.length < 5) {
+                winners.push(availableProducts[winners.length % availableProducts.length]);
+            }
+            
+            console.log('Setting Week\'s Winners:', winners.length, 'products');
+            setWeeksWinners(winners);
+        } catch (error) {
+            console.error('Error updating Week\'s Winners:', error);
+        }
+    };
+
+    // 计算商品得分
+    const calculateProductScore = (product, currentSalesData) => {
+        if (!product) return 0;
+        
+        let score = 0;
+        const salesDataToUse = currentSalesData || salesData;
+        
+        try {
+            // 1. 基础分数（所有产品都有10分基础分）
+            score += 10;
+            
+            // 2. 销售数据（最高40分）
+            const salesCount = salesDataToUse[product._id] || 0;
+            score += Math.min(salesCount * 4, 40); // 每卖出一件加4分，最高40分
+            
+            // 3. 促销情况（最高30分）
+            if (product.isOnPromotion && product.promotionPrice) {
+                const discountPercent = (product.price - product.promotionPrice) / product.price;
+                score += discountPercent * 30; // 最高30分
+            }
+            
+            // 4. 库存情况（最高20分）
+            const totalStock = Object.values(product.sizes || {}).reduce((a, b) => a + b, 0);
+            if (totalStock > 0) {
+                if (totalStock <= 20) {
+                    score += 20; // 库存较少加20分
+                } else if (totalStock <= 50) {
+                    score += 15; // 库存适中加15分
+                } else {
+                    score += 10; // 库存充足加10分
+                }
+            }
+        } catch (error) {
+            console.error('Error calculating score for product:', product._id, error);
+            return 10; // 如果计算出错，返回基础分
+        }
+        
+        return score;
+    };
+
+    // 在订单完成后更新Week's Winners
+    const updateAfterOrder = async () => {
+        try {
+            await fetchSalesData();
+        } catch (error) {
+            console.error('Error updating after order:', error);
+        }
+    };
+
     const value = {
         products, currency, delivery_fee,
         search, setSearch, showSearch, setShowSearch,
@@ -373,7 +522,9 @@ const ShopContextProvider = (props) => {
         clearWishlist,
         getUserWishlist,
         isInWishlist,
-        getWishlistCount
+        getWishlistCount,
+        weeksWinners,
+        updateAfterOrder
     }
 
     return (
