@@ -99,7 +99,11 @@ const translations = {
     wishlistCleared: 'Wishlist cleared',
     addToCartFromWishlist: 'Add to Cart',
     weeksWinners: "Week's Winners",
-    sale: "Sale"
+    sale: "Sale",
+    fontSize: 'Font Size',
+    small: 'Small',
+    medium: 'Medium',
+    large: 'Large'
   },
   zh: {
     home: '首页',
@@ -193,7 +197,11 @@ const translations = {
     wishlistCleared: '愿望单已清空',
     addToCartFromWishlist: '加入购物车',
     weeksWinners: "本周热销",
-    sale: "促销"
+    sale: "促销",
+    fontSize: '字体大小',
+    small: '小',
+    medium: '中',
+    large: '大'
   }
 };
 

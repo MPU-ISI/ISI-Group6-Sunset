@@ -1,17 +1,19 @@
 import { useFontSize } from '../context/FontSizeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const FontSizeControl = () => {
     const { fontSize, changeFontSize } = useFontSize();
+    const { t } = useLanguage();
 
     const sizes = [
-        { label: 'S', value: 'small' },
-        { label: 'M', value: 'medium' },
-        { label: 'L', value: 'large' }
+        { label: t('small'), value: 'small' },
+        { label: t('medium'), value: 'medium' },
+        { label: t('large'), value: 'large' }
     ];
 
     return (
         <div className="flex items-center space-x-2">
-            <span className="text-sm">Font Size:</span>
+            <span className="text-sm">{t('fontSize')}:</span>
             {sizes.map((size) => (
                 <button
                     key={size.value}
