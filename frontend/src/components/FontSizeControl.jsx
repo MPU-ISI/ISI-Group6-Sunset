@@ -4,14 +4,14 @@ const FontSizeControl = () => {
     const { fontSize, changeFontSize } = useFontSize();
 
     const sizes = [
-        { label: '小', value: 'small' },
-        { label: '中', value: 'medium' },
-        { label: '大', value: 'large' }
+        { label: 'S', value: 'small' },
+        { label: 'M', value: 'medium' },
+        { label: 'L', value: 'large' }
     ];
 
     return (
         <div className="flex items-center space-x-2">
-            <span className="text-sm">字体大小：</span>
+            <span className="text-sm">Font Size:</span>
             {sizes.map((size) => (
                 <button
                     key={size.value}

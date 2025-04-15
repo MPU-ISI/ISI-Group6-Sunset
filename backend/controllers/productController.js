@@ -135,22 +135,16 @@ const updateProductStock = async (req, res) => {
             return res.json({ success: false, message: "产品不存在" });
         }
 
-        // 获取当前尺码的库存
-        const currentStock = product.sizes.get(size) || 0;
-        
-        // 计算新库存
-        const newStock = currentStock + Number(quantity);
-        
         // 确保库存不小于0
-        if (newStock < 0) {
-            return res.json({ success: false, message: "库存不足" });
+        if (quantity < 0) {
+            return res.json({ success: false, message: "库存不能为负数" });
         }
 
-        // 更新库存
-        product.sizes.set(size, newStock);
+        // 直接设置新的库存值
+        product.sizes.set(size, Number(quantity));
         await product.save();
 
-        res.json({ success: true, message: "库存已更新", newStock });
+        res.json({ success: true, message: "库存已更新", newStock: quantity });
 
     } catch (error) {
         console.log(error);
