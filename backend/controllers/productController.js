@@ -126,25 +126,25 @@ const updateProductStock = async (req, res) => {
         const { productId, size, quantity } = req.body;
 
         if (!productId || !size || quantity === undefined) {
-            return res.json({ success: false, message: "缺少必要参数" });
+            return res.json({ success: false, message: "Missing required parameters" });
         }
 
         const product = await productModel.findById(productId);
         
         if (!product) {
-            return res.json({ success: false, message: "产品不存在" });
+            return res.json({ success: false, message: "Product not found" });
         }
 
         // 确保库存不小于0
         if (quantity < 0) {
-            return res.json({ success: false, message: "库存不能为负数" });
+            return res.json({ success: false, message: "Stock cannot be negative" });
         }
 
         // 直接设置新的库存值
         product.sizes.set(size, Number(quantity));
         await product.save();
 
-        res.json({ success: true, message: "库存已更新", newStock: quantity });
+        res.json({ success: true, message: "Stock updated", newStock: quantity });
 
     } catch (error) {
         console.log(error);
@@ -158,13 +158,13 @@ const toggleProductStatus = async (req, res) => {
         const { productId } = req.body;
         
         if (!productId) {
-            return res.json({ success: false, message: "产品ID不能为空" });
+            return res.json({ success: false, message: "Product ID is required" });
         }
         
         const product = await productModel.findById(productId);
         
         if (!product) {
-            return res.json({ success: false, message: "产品不存在" });
+            return res.json({ success: false, message: "Product not found" });
         }
         
         // 切换状态
@@ -173,7 +173,7 @@ const toggleProductStatus = async (req, res) => {
         
         return res.json({ 
             success: true, 
-            message: product.enabled ? "产品已启用" : "产品已禁用",
+            message: product.enabled ? "Product is enabled" : "Product is disabled",
             enabled: product.enabled
         });
         
@@ -201,13 +201,13 @@ const updateProduct = async (req, res) => {
         } = req.body;
         
         if (!productId) {
-            return res.json({ success: false, message: "产品ID不能为空" });
+            return res.json({ success: false, message: "Product ID is required" });
         }
         
         const product = await productModel.findById(productId);
         
         if (!product) {
-            return res.json({ success: false, message: "产品不存在" });
+            return res.json({ success: false, message: "Product not found" });
         }
         
         // 更新信息
@@ -228,7 +228,7 @@ const updateProduct = async (req, res) => {
         
         return res.json({ 
             success: true, 
-            message: "产品信息已更新",
+            message: "Product information updated",
             product
         });
         
@@ -341,13 +341,13 @@ const managePromotion = async (req, res) => {
         const { productId, isOnPromotion, promotionPrice, promotionStartDate, promotionEndDate } = req.body;
         
         if (!productId) {
-            return res.json({ success: false, message: "产品ID不能为空" });
+            return res.json({ success: false, message: "Product ID is required" });
         }
         
         const product = await productModel.findById(productId);
         
         if (!product) {
-            return res.json({ success: false, message: "产品不存在" });
+            return res.json({ success: false, message: "Product not found" });
         }
         
         // 更新促销信息
@@ -377,7 +377,7 @@ const managePromotion = async (req, res) => {
         
         return res.json({ 
             success: true, 
-            message: product.isOnPromotion ? "促销已设置" : "促销已取消",
+            message: product.isOnPromotion ? "Promotion is set" : "Promotion is cancelled",
             product
         });
         
@@ -406,7 +406,7 @@ const clearExpiredPromotions = async (req, res) => {
         
         return res.json({
             success: true, 
-            message: `已清理 ${expiredPromotions.length} 个过期促销`,
+            message: `Cleaned ${expiredPromotions.length} expired promotions`,
             count: expiredPromotions.length
         });
         
