@@ -20,6 +20,64 @@ const ShopContextProvider = (props) => {
     const [salesData, setSalesData] = useState({});
     const navigate = useNavigate();
 
+    // 更新用户偏好记录
+    const updateUserPreferences = (category, subCategory) => {
+        try {
+            // 从localStorage获取当前用户偏好
+            const storedPreferences = localStorage.getItem('userPreferences');
+            let userPreferences = {
+                categories: {},
+                subCategories: {}
+            };
+            
+            if (storedPreferences) {
+                userPreferences = JSON.parse(storedPreferences);
+            }
+            
+            // 更新类别计数
+            if (category) {
+                if (!userPreferences.categories) {
+                    userPreferences.categories = {};
+                }
+                userPreferences.categories[category] = (userPreferences.categories[category] || 0) + 1;
+            }
+            
+            // 更新子类别计数
+            if (subCategory) {
+                if (!userPreferences.subCategories) {
+                    userPreferences.subCategories = {};
+                }
+                userPreferences.subCategories[subCategory] = (userPreferences.subCategories[subCategory] || 0) + 1;
+            }
+            
+            // 将更新后的偏好保存到localStorage
+            localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
+        } catch (error) {
+            console.error('Error updating user preferences:', error);
+        }
+    };
+
+    // 当用户搜索时更新偏好
+    const handleSearch = (searchTerm) => {
+        setSearch(searchTerm);
+        
+        // 检查搜索词是否匹配任何类别或子类别
+        const categories = ['Men', 'Women', 'Kids'];
+        const subCategories = ['Topwear', 'Bottomwear', 'Winterwear'];
+        
+        // 尝试匹配类别
+        const matchedCategory = categories.find(cat => 
+            searchTerm.toLowerCase().includes(cat.toLowerCase())
+        );
+        
+        // 尝试匹配子类别
+        const matchedSubCategory = subCategories.find(subCat => 
+            searchTerm.toLowerCase().includes(subCat.toLowerCase())
+        );
+        
+        // 更新用户偏好
+        updateUserPreferences(matchedCategory, matchedSubCategory);
+    };
 
     const addToCart = async (itemId, size) => {
         if (!size) {
@@ -38,6 +96,9 @@ const ShopContextProvider = (props) => {
             toast.error('Selected size is out of stock');
             return;
         }
+
+        // 更新用户偏好
+        updateUserPreferences(product.category, product.subCategory);
 
         let cartData = structuredClone(cartItems);
         const currentQuantity = cartData[itemId]?.[size] || 0;
@@ -309,24 +370,33 @@ const ShopContextProvider = (props) => {
     }, [token])
 
     const addToWishlist = async (itemId, size) => {
+        if (!size) {
+            toast.error('Please select a size');
+            return;
+        }
+
+        // 查找对应产品并更新用户偏好
+        const product = products.find(p => p._id === itemId);
+        if (product) {
+            updateUserPreferences(product.category, product.subCategory);
+        }
+
         let wishlistData = structuredClone(wishlistItems);
         if (wishlistData[itemId]) {
-            if (wishlistData[itemId][size]) {
-                toast.error('Item already in wishlist with this size');
-                return;
-            }
-            wishlistData[itemId][size] = 1;
+            wishlistData[itemId][size] = true;
         } else {
             wishlistData[itemId] = {};
-            wishlistData[itemId][size] = 1;
+            wishlistData[itemId][size] = true;
         }
+
         setWishlistItems(wishlistData);
 
         if (token) {
             try {
-                // 确保传递所有必要的参数
-                await axios.post(backendUrl + '/api/wishlist/add', { itemId, size }, { headers: { token } });
-                toast.success('Added to wishlist');
+                const response = await axios.post(backendUrl + '/api/wishlist/add', { itemId, size }, { headers: { token } });
+                if (response.data.success) {
+                    toast.success('Added to wishlist');
+                }
             } catch (error) {
                 console.log(error);
                 toast.error(error.message);
@@ -571,7 +641,9 @@ const ShopContextProvider = (props) => {
         getWishlistCount,
         checkWishlistPromotion,
         weeksWinners,
-        updateAfterOrder
+        updateAfterOrder,
+        handleSearch,
+        updateUserPreferences
     }
 
     return (

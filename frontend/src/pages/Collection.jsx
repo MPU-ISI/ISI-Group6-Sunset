@@ -7,7 +7,7 @@ import ProductItem from '../components/ProductItem';
 
 const Collection = () => {
 
-  const { products , search , showSearch } = useContext(ShopContext);
+  const { products, search, showSearch, updateUserPreferences } = useContext(ShopContext);
   const { t } = useLanguage();
   const [showFilter,setShowFilter] = useState(false);
   const [filterProducts,setFilterProducts] = useState([]);
@@ -23,20 +23,26 @@ const Collection = () => {
   const [totalPages, setTotalPages] = useState(0);
 
   const toggleCategory = (e) => {
-    if (category.includes(e.target.value)) {
-        setCategory(prev=> prev.filter(item => item !== e.target.value))
+    const categoryValue = e.target.value;
+    if (category.includes(categoryValue)) {
+        setCategory(prev => prev.filter(item => item !== categoryValue))
     }
-    else{
-      setCategory(prev => [...prev,e.target.value])
+    else {
+      setCategory(prev => [...prev, categoryValue]);
+      // 记录用户选择的类别
+      updateUserPreferences(categoryValue, null);
     }
   }
 
   const toggleSubCategory = (e) => {
-    if (subCategory.includes(e.target.value)) {
-      setSubCategory(prev=> prev.filter(item => item !== e.target.value))
+    const subCategoryValue = e.target.value;
+    if (subCategory.includes(subCategoryValue)) {
+      setSubCategory(prev => prev.filter(item => item !== subCategoryValue))
     }
-    else{
-      setSubCategory(prev => [...prev,e.target.value])
+    else {
+      setSubCategory(prev => [...prev, subCategoryValue]);
+      // 记录用户选择的子类别
+      updateUserPreferences(null, subCategoryValue);
     }
   }
 
