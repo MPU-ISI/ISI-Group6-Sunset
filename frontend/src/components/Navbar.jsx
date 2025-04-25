@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { FaHeart } from 'react-icons/fa';
 import { Link, NavLink } from 'react-router-dom';
 import { assets } from '../assets/assets';
@@ -9,9 +9,33 @@ import FontSizeControl from './FontSizeControl';
 const Navbar = () => {
 
     const [visible, setVisible] = useState(false);
+    const [hasPromotion, setHasPromotion] = useState(false);
 
-    const { setShowSearch, getCartCount, getWishlistCount, navigate, token, setToken, setCartItems } = useContext(ShopContext);
+    const { 
+        setShowSearch, 
+        getCartCount, 
+        getWishlistCount, 
+        navigate, 
+        token, 
+        setToken, 
+        setCartItems, 
+        checkWishlistPromotion, 
+        products, 
+        wishlistItems 
+    } = useContext(ShopContext);
+    
     const { language, toggleLanguage, t } = useLanguage();
+
+    // 检查愿望单中是否有促销商品
+    useEffect(() => {
+        if (token && products.length > 0 && Object.keys(wishlistItems).length > 0) {
+            // 检查是否有促销商品，但不显示通知
+            const hasPromo = checkWishlistPromotion(false);
+            setHasPromotion(hasPromo);
+        } else {
+            setHasPromotion(false);
+        }
+    }, [token, products, wishlistItems, checkWishlistPromotion]);
 
     const logout = () => {
         navigate('/login')
@@ -68,7 +92,12 @@ const Navbar = () => {
                             <div className='flex flex-col gap-2 w-36 py-3 px-5  bg-slate-100 text-gray-500 rounded'>
                                 <p className='cursor-pointer hover:text-black'>{t('profile')}</p>
                                 <p onClick={() => navigate('/orders')} className='cursor-pointer hover:text-black'>{t('orders')}</p>
-                                <p onClick={() => navigate('/wishlist')} className='cursor-pointer hover:text-black'>{t('wishlist')}</p>
+                                <p onClick={() => navigate('/wishlist')} className='cursor-pointer hover:text-black'>
+                                    {t('wishlist')}
+                                    {hasPromotion && (
+                                        <span className="ml-1 text-xs text-red-500">🔥</span>
+                                    )}
+                                </p>
                                 <p onClick={logout} className='cursor-pointer hover:text-black'>{t('logout')}</p>
                             </div>
                         </div>}
@@ -79,10 +108,15 @@ const Navbar = () => {
                     onClick={() => token ? navigate('/wishlist') : navigate('/login')}
                     className='relative cursor-pointer'
                 >
-                    <FaHeart className="text-gray-500 hover:text-red-500 w-5 h-5" />
+                    <FaHeart className={hasPromotion ? "text-red-500 w-5 h-5" : "text-gray-500 hover:text-red-500 w-5 h-5"} />
                     {getWishlistCount() > 0 && (
                         <div className='absolute right-[-5px] bottom-[-5px] w-4 h-4 bg-black text-white text-[8px] rounded-full flex items-center justify-center'>
                             {getWishlistCount()}
+                        </div>
+                    )}
+                    {hasPromotion && (
+                        <div className='absolute right-[-8px] top-[-8px] w-4 h-4 bg-red-500 text-white text-[8px] rounded-full flex items-center justify-center'>
+                            🔥
                         </div>
                     )}
                 </div>
@@ -121,12 +155,15 @@ const Navbar = () => {
                         }}
                         className='py-2 pl-6 border cursor-pointer flex items-center gap-2'
                     >
-                        <FaHeart className="text-gray-500 w-4 h-4" />
+                        <FaHeart className={hasPromotion ? "text-red-500 w-4 h-4" : "text-gray-500 w-4 h-4"} />
                         <span>{t('wishlist')}</span>
                         {getWishlistCount() > 0 && (
                             <span className='ml-1 bg-black text-white w-4 h-4 text-center rounded-full text-xs'>
                                 {getWishlistCount()}
                             </span>
+                        )}
+                        {hasPromotion && (
+                            <span className="ml-1 text-red-500">🔥</span>
                         )}
                     </div>
                     <div

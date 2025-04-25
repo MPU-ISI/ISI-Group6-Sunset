@@ -300,9 +300,11 @@ const ShopContextProvider = (props) => {
         if (!token && localStorage.getItem('token')) {
             setToken(localStorage.getItem('token'))
             getUserCart(localStorage.getItem('token'))
+            getUserWishlist(localStorage.getItem('token'))
         }
         if (token) {
             getUserCart(token)
+            getUserWishlist(token)
         }
     }, [token])
 
@@ -322,6 +324,7 @@ const ShopContextProvider = (props) => {
 
         if (token) {
             try {
+                // 确保传递所有必要的参数
                 await axios.post(backendUrl + '/api/wishlist/add', { itemId, size }, { headers: { token } });
                 toast.success('Added to wishlist');
             } catch (error) {
@@ -342,6 +345,7 @@ const ShopContextProvider = (props) => {
 
             if (token) {
                 try {
+                    // 确保传递所有必要的参数
                     await axios.post(backendUrl + '/api/wishlist/remove', { itemId, size }, { headers: { token } });
                     toast.success('Removed from wishlist');
                 } catch (error) {
@@ -373,10 +377,49 @@ const ShopContextProvider = (props) => {
             const response = await axios.post(backendUrl + '/api/wishlist/get', {}, { headers: { token } });
             if (response.data.success) {
                 setWishlistItems(response.data.wishlistData);
+                // 获取愿望单数据后检查是否有促销商品
+                checkWishlistPromotion();
             }
         } catch (error) {
             console.log(error);
+            // 失败时提示用户但不显示具体错误，以免影响用户体验
+            toast.error('Failed to load wishlist');
         }
+    }
+    
+    // 检查愿望单中是否有促销商品
+    const checkWishlistPromotion = (showNotification = false) => {
+        // 如果愿望单为空或产品列表为空，直接返回
+        if (Object.keys(wishlistItems).length === 0 || products.length === 0) {
+            return false;
+        }
+        
+        // 遍历愿望单中的所有商品
+        for (const itemId in wishlistItems) {
+            // 查找对应的产品信息
+            const product = products.find(p => p._id === itemId);
+            
+            // 如果产品存在且正在促销
+            if (product && product.isOnPromotion && product.promotionPrice && product.promotionPrice < product.price) {
+                // 只在指定时显示通知
+                if (showNotification) {
+                    toast.info('Your Wishlist has Promotion!', {
+                        position: 'top-right',
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                    });
+                }
+                
+                // 返回true表示找到了促销商品
+                return true;
+            }
+        }
+        
+        // 没有找到促销商品
+        return false;
     }
 
     const isInWishlist = (itemId, size) => {
@@ -526,6 +569,7 @@ const ShopContextProvider = (props) => {
         getUserWishlist,
         isInWishlist,
         getWishlistCount,
+        checkWishlistPromotion,
         weeksWinners,
         updateAfterOrder
     }

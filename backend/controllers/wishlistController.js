@@ -41,10 +41,10 @@ const getWishlist = async (req, res) => {
 // 获取用户愿望单数据
 const getUserWishlist = async (req,res) => {
     try {
-        const { userId } = req.body
+        const userId = req.user._id;
         
-        const userData = await userModel.findById(userId)
-        let wishlistData = await userData.wishlistData;
+        const userData = await userModel.findById(userId);
+        let wishlistData = userData.wishlistData;
 
         res.json({ success: true, wishlistData })
 
@@ -57,61 +57,72 @@ const getUserWishlist = async (req,res) => {
 // 添加商品到愿望单
 const addToWishlist = async (req,res) => {
     try {
-        const { userId, itemId } = req.body
+        const userId = req.user._id;
+        const { itemId, size } = req.body;
 
-        const userData = await userModel.findById(userId)
-        let wishlistData = await userData.wishlistData;
+        const userData = await userModel.findById(userId);
+        let wishlistData = userData.wishlistData;
 
-        if (wishlistData[itemId]) {
-            return res.json({ success: false, message: "Item already in wishlist" })
+        if (!wishlistData[itemId]) {
+            wishlistData[itemId] = {};
+        }
+        
+        if (wishlistData[itemId][size]) {
+            return res.json({ success: false, message: "Item already in wishlist with this size" });
         }
 
-        wishlistData[itemId] = 1
-        await userModel.findByIdAndUpdate(userId, {wishlistData})
+        wishlistData[itemId][size] = 1;
+        await userModel.findByIdAndUpdate(userId, {wishlistData});
 
-        res.json({ success: true, message: "Added To Wishlist" })
+        res.json({ success: true, message: "Added To Wishlist" });
 
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
 }
 
 // 从愿望单移除商品
 const removeFromWishlist = async (req,res) => {
     try {
-        const { userId, itemId } = req.body
+        const userId = req.user._id;
+        const { itemId, size } = req.body;
 
-        const userData = await userModel.findById(userId)
-        let wishlistData = await userData.wishlistData;
+        const userData = await userModel.findById(userId);
+        let wishlistData = userData.wishlistData;
 
-        if (wishlistData[itemId]) {
-            delete wishlistData[itemId]
-            await userModel.findByIdAndUpdate(userId, {wishlistData})
-            res.json({ success: true, message: "Removed from wishlist" })
+        if (wishlistData[itemId] && wishlistData[itemId][size]) {
+            delete wishlistData[itemId][size];
+            
+            // 如果商品没有尺码了，则删除整个商品
+            if (Object.keys(wishlistData[itemId]).length === 0) {
+                delete wishlistData[itemId];
+            }
+            
+            await userModel.findByIdAndUpdate(userId, {wishlistData});
+            res.json({ success: true, message: "Removed from wishlist" });
         } else {
-            res.json({ success: false, message: "Item not found in wishlist" })
+            res.json({ success: false, message: "Item not found in wishlist" });
         }
 
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
 }
 
 // 清空愿望单
 const clearWishlist = async (req,res) => {
     try {
-        const { userId } = req.body
+        const userId = req.user._id;
 
-        const userData = await userModel.findById(userId)
-        await userModel.findByIdAndUpdate(userId, {wishlistData: {}})
+        await userModel.findByIdAndUpdate(userId, {wishlistData: {}});
         
-        res.json({ success: true, message: "Wishlist cleared" })
+        res.json({ success: true, message: "Wishlist cleared" });
 
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
 }
 
