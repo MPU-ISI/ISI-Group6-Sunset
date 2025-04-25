@@ -5,11 +5,16 @@ import Title from './Title';
 import ProductItem from './ProductItem';
 
 const RecommendForYou = () => {
-    const { products } = useContext(ShopContext);
+    const { products, token } = useContext(ShopContext);
     const { t } = useLanguage();
     const [recommendedProducts, setRecommendedProducts] = useState([]);
 
     useEffect(() => {
+        // 如果用户未登录，不处理推荐
+        if (!token) {
+            return;
+        }
+
         // 从localStorage获取用户偏好
         const getUserPreferences = () => {
             const storedPreferences = localStorage.getItem('userPreferences');
@@ -71,9 +76,10 @@ const RecommendForYou = () => {
         
         // 只取前5个产品
         setRecommendedProducts(filteredProducts.slice(0, 5));
-    }, [products]);
+    }, [products, token]);
 
-    if (!recommendedProducts || recommendedProducts.length === 0) {
+    // 如果用户未登录或没有推荐产品，则不显示此组件
+    if (!token || !recommendedProducts || recommendedProducts.length === 0) {
         return null;
     }
 

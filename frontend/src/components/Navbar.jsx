@@ -109,7 +109,7 @@ const Navbar = () => {
                     className='relative cursor-pointer'
                 >
                     <FaHeart className={hasPromotion ? "text-red-500 w-5 h-5" : "text-gray-500 hover:text-red-500 w-5 h-5"} />
-                    {getWishlistCount() > 0 && (
+                    {token && getWishlistCount() > 0 && (
                         <div className='absolute right-[-5px] bottom-[-5px] w-4 h-4 bg-black text-white text-[8px] rounded-full flex items-center justify-center'>
                             {getWishlistCount()}
                         </div>
@@ -127,7 +127,7 @@ const Navbar = () => {
                     className='relative cursor-pointer'
                 >
                     <img src={assets.cart_icon} className='w-5 min-w-5' alt="" />
-                    {getCartCount() > 0 && (
+                    {token && getCartCount() > 0 && (
                         <div className='absolute right-[-5px] bottom-[-5px] w-4 h-4 bg-black text-white text-[8px] rounded-full flex items-center justify-center'>
                             {getCartCount()}
                         </div>
@@ -157,7 +157,7 @@ const Navbar = () => {
                     >
                         <FaHeart className={hasPromotion ? "text-red-500 w-4 h-4" : "text-gray-500 w-4 h-4"} />
                         <span>{t('wishlist')}</span>
-                        {getWishlistCount() > 0 && (
+                        {token && getWishlistCount() > 0 && (
                             <span className='ml-1 bg-black text-white w-4 h-4 text-center rounded-full text-xs'>
                                 {getWishlistCount()}
                             </span>
@@ -175,7 +175,7 @@ const Navbar = () => {
                     >
                         <img src={assets.cart_icon} className='w-4' alt="" />
                         <span>{t('cart')}</span>
-                        {getCartCount() > 0 && (
+                        {token && getCartCount() > 0 && (
                             <span className='ml-1 bg-black text-white w-4 h-4 text-center rounded-full text-xs'>
                                 {getCartCount()}
                             </span>
